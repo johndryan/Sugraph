@@ -3,7 +3,8 @@ An interactive learning toy for my daughter's magnet wall.
 
 ## Installation
 
-To follow…
+1. Use the `ProjectGenerator` (provided with OpenFrameworks) to update the base path to OpenFramework and install add-ons ([as per the ml4a guide](https://github.com/ml4a/ml4a-ofx#setup-your-project)).
+2. Run `sh setup.sh` to download the necessary data.
 
 ### Add-ons
 

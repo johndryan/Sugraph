@@ -16,11 +16,7 @@ void ofApp::setup(){
     width = 640;
     height = 480;
     
-#ifdef RELEASE
     ccv.setup(ofToDataPath("image-net-2012.sqlite3"));
-#else
-    ccv.setup(ofToDataPath("../../../../data/image-net-2012.sqlite3"));
-#endif
 
     cam.setDeviceID(0);
     cam.setup(width, height);

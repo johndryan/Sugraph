@@ -87,3 +87,10 @@ Desktop.ini
 
 # Android
 .csettings
+
+##################
+# project specific
+##################
+
+# Imagenet Data (downloaded via setup.sh)
+/bin/data/image-net*
