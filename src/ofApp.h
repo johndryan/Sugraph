@@ -82,7 +82,7 @@ public:
     int oscPort;
     
     ofxPanel gui;
-    ofxToggle bRunning;
+    ofxToggle bRunning, bPause;
     ofxButton bAdd, bTrain, bClassify, bSave, bLoad;
     ofParameter<float> minArea, maxArea, threshold;
     ofParameter<int> nDilate;

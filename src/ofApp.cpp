@@ -68,6 +68,7 @@ void ofApp::setup(){
     gCv.add(threshold.set("Threshold", 128, 0, 255));
     gCv.add(nDilate.set("Dilations", 1, 0, 8));
     gui.add(trainingLabel.set("Training Label", 0, 0, classNames.size()-1));
+    gui.add(bPause.setup("Pause Video", false));
     gui.add(bAdd.setup("Add samples"));
     gui.add(bTrain.setup("Train"));
     gui.add(bRunning.setup("Run", false));
@@ -94,7 +95,9 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    if (!bPause) {
     cam.update();
+    }
     if(cam.isFrameNew())
     {
         // get grayscale image and threshold
