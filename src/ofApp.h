@@ -20,12 +20,6 @@ using namespace cv;
 // Speak?
 // #define USE_SYSTEM_SPEECH
 
-// where to send osc messages by default
-#define DEFAULT_OSC_DESTINATION "localhost"
-#define DEFAULT_OSC_ADDRESS "/classification"
-#define DEFAULT_OSC_PORT 5000
-
-
 struct FoundSquare {
     ofImage img;
     string label;
@@ -76,10 +70,6 @@ public:
     ofFbo fbo;
     ofxCvGrayscaleImage grayImage;
     ofxCvColorImage colorImage;
-    
-    ofxOscSender sender;
-    string oscDestination, oscAddress;
-    int oscPort;
     
     ofxPanel gui;
     ofxToggle bRunning, bPause;

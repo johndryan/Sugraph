@@ -35,18 +35,10 @@ void ofApp::setup(){
     bLoad.addListener(this, &ofApp::load);
     trainingLabel.addListener(this, &ofApp::setTrainingLabel);
     
-    // default settings
-    oscDestination = DEFAULT_OSC_DESTINATION;
-    oscAddress = DEFAULT_OSC_ADDRESS;
-    oscPort = DEFAULT_OSC_PORT;
-    
     // load settings from file
     ofxXmlPoco xml;
     xml.load(ofToDataPath("settings_sugraphclassifier.xml"));
     xml.setTo("SugraphOSC");
-    oscDestination = xml.getValue("ip");
-    oscPort = ofToInt(xml.getValue("port"));
-    oscAddress = xml.getValue("address");
     if (xml.exists("classes") && xml.setTo("classes") && xml.exists("class[0]")) {
         xml.setTo("class[0]");
         classNames.clear();
@@ -56,8 +48,6 @@ void ofApp::setup(){
         }
         while(xml.setToSibling());
     }
-
-    sender.setup(oscDestination, oscPort);
     
     gui.setup();
     gui.setName("SugraphClassifier");
@@ -271,12 +261,6 @@ void ofApp::classifyCurrentSamples() {
             foundSquares[i].isPrediction = true;
             foundSquares[i].label = classNames[label];
 
-            // send over OSC
-            ofxOscMessage m;
-            m.setAddress(oscAddress);
-            m.addStringArg(foundSquares[i].label);
-            sender.sendMessage(m, false);
-            
             // Add to allChars
             theseChars += foundSquares[i].label+" ";
         }
