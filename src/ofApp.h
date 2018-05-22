@@ -85,4 +85,6 @@ public:
     GestureRecognitionPipeline pipeline;
     ofxCcv ccv;
     bool isTrained, toAddSamples, toClassify;
+    
+    string allFoundChars;
 };

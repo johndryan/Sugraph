@@ -3,8 +3,9 @@
 	<port>5000</port>
 	<address>/classification</address>
     <classes>
-        <class>circle</class>
-        <class>star</class>
-        <class>arrow</class>
+        <class>E</class>
+        <class>M</class>
+        <class>B</class>
+        <class>R</class>
     </classes>
 </DoodleOSC>

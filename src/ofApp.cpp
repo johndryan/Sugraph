@@ -9,6 +9,10 @@ void FoundSquare::draw() {
     ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}, area="+ofToString(area), 4, img.getHeight()-5);
 }
 
+bool isFoundSquareRightOfOther( FoundSquare &a, FoundSquare &b){
+    return a.rect.x > b.rect.x;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowShape(1600, 900);
@@ -218,6 +222,8 @@ void ofApp::gatherFoundSquares() {
         fs.img.resize(224, 224);
         foundSquares.push_back(fs);
     }
+    // Sort by X position
+    ofSort(foundSquares,isFoundSquareRightOfOther);
 }
 
 //--------------------------------------------------------------
@@ -248,6 +254,7 @@ void ofApp::trainClassifier() {
 void ofApp::classifyCurrentSamples() {
     ofLog(OF_LOG_NOTICE, "Classifiying on frame "+ofToString(ofGetFrameNum()));
     gatherFoundSquares();
+    string theseChars = "";
     for (int i=0; i<foundSquares.size(); i++) {
         vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
         VectorFloat inputVector(encoding.size());
@@ -263,7 +270,21 @@ void ofApp::classifyCurrentSamples() {
             m.setAddress(oscAddress);
             m.addStringArg(foundSquares[i].label);
             sender.sendMessage(m, false);
+            
+            // Add to allChars
+            theseChars += foundSquares[i].label+" ";
         }
+    }
+    if (allFoundChars != theseChars) {
+        // New letter/order found
+        ofLog(OF_LOG_NOTICE, "New letters found: "+theseChars);
+        string cmd = "say '" + theseChars + "'";
+        system(cmd.c_str());
+        if (theseChars == "E M B E R ") {
+            ofLog(OF_LOG_NOTICE, "EMBER FOUND!");
+            system("say 'You spelled Ember'");
+        }
+        allFoundChars = theseChars;
     }
 }
 

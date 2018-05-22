@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <DoodleClassifier>
-	<circle>0</circle>
+	<D>0</D>
 	<Run>1</Run>
 	<CV_initial>
 		<Min_area>12.6173</Min_area>
@@ -8,10 +8,5 @@
 		<Threshold>105.383</Threshold>
 		<Dilations>3</Dilations>
 	</CV_initial>
-	<DoodleClassifier />
-	<arrow>2</arrow>
-	<star>1</star>
-	<D>0</D>
-	<O>1</O>
 	<E>0</E>
 </DoodleClassifier>
