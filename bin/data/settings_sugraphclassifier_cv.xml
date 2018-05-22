@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<DoodleClassifier>
+<SugraphClassifier>
 	<circle>0</circle>
 	<Run>1</Run>
 	<CV_initial>
@@ -8,10 +8,20 @@
 		<Threshold>105.383</Threshold>
 		<Dilations>3</Dilations>
 	</CV_initial>
-	<DoodleClassifier />
+	<SugraphClassifier />
 	<arrow>2</arrow>
 	<star>1</star>
 	<D>0</D>
 	<O>1</O>
 	<E>0</E>
-</DoodleClassifier>
+</SugraphClassifier>
+<SugraphClassifier>
+	<E>0</E>
+	<Run>1</Run>
+	<CV_initial>
+		<Min_area>10</Min_area>
+		<Max_area>200</Max_area>
+		<Threshold>128</Threshold>
+		<Dilations>1</Dilations>
+	</CV_initial>
+</SugraphClassifier>

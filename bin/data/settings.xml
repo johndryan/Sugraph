@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<DoodleClassifier>
+<SugraphClassifier>
 	<D>0</D>
 	<Run>1</Run>
 	<CV_initial>
@@ -9,4 +9,4 @@
 		<Dilations>3</Dilations>
 	</CV_initial>
 	<E>0</E>
-</DoodleClassifier>
+</SugraphClassifier>

@@ -1,4 +1,4 @@
-<DoodleOSC>
+<SugraphOSC>
 	<ip>127.0.0.1</ip>
 	<port>5000</port>
 	<address>/classification</address>
@@ -8,4 +8,4 @@
         <class>B</class>
         <class>R</class>
     </classes>
-</DoodleOSC>
+</SugraphOSC>

@@ -39,8 +39,8 @@ void ofApp::setup(){
     
     // load settings from file
     ofxXmlPoco xml;
-    xml.load(ofToDataPath("settings_doodleclassifier.xml"));
-    xml.setTo("DoodleOSC");
+    xml.load(ofToDataPath("settings_sugraphclassifier.xml"));
+    xml.setTo("SugraphOSC");
     oscDestination = xml.getValue("ip");
     oscPort = ofToInt(xml.getValue("port"));
     oscAddress = xml.getValue("address");
@@ -57,7 +57,7 @@ void ofApp::setup(){
     sender.setup(oscDestination, oscPort);
     
     gui.setup();
-    gui.setName("DoodleClassifier");
+    gui.setName("SugraphClassifier");
     ofParameterGroup gCv;
     gCv.setName("CV initial");
     gCv.add(minArea.set("Min area", 10, 1, 100));
@@ -73,7 +73,7 @@ void ofApp::setup(){
     gui.add(bLoad.setup("Load"));
     gui.add(gCv);
     gui.setPosition(0, 400);
-    gui.loadFromFile("settings_doodleclassifier_cv.xml");
+    gui.loadFromFile("settings_sugraphclassifier_cv.xml");
     
     fbo.allocate(width, height);
     colorImage.allocate(width, height);
@@ -207,7 +207,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    gui.saveToFile(ofToDataPath("settings_doodleclassifier_cv.xml"));
+    gui.saveToFile(ofToDataPath("settings_sugraphclassifier_cv.xml"));
 }
 
 //--------------------------------------------------------------
@@ -295,12 +295,12 @@ void ofApp::setTrainingLabel(int & label_) {
 
 //--------------------------------------------------------------
 void ofApp::save() {
-    pipeline.save(ofToDataPath("doodleclassifier_model.grt"));
+    pipeline.save(ofToDataPath("sugraphclassifier_model.grt"));
 }
 
 //--------------------------------------------------------------
 void ofApp::load() {
-    pipeline.load(ofToDataPath("doodleclassifier_model.grt"));
+    pipeline.load(ofToDataPath("sugraphclassifier_model.grt"));
     isTrained = true;
 }
 
