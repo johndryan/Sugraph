@@ -34,7 +34,7 @@ void ofApp::setup(){
     oscPort = DEFAULT_OSC_PORT;
     
     // load settings from file
-    ofXml xml;
+    ofxXmlPoco xml;
     xml.load(ofToDataPath("settings_doodleclassifier.xml"));
     xml.setTo("DoodleOSC");
     oscDestination = xml.getValue("ip");

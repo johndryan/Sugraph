@@ -7,6 +7,7 @@
 #include "ofxGrt.h"
 #include "ofxCcv.h"
 #include "ofxOsc.h"
+#include "ofxXmlPoco.h"
 
 using namespace ofxCv;
 using namespace cv;

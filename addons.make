@@ -4,3 +4,4 @@ ofxGrt
 ofxGui
 ofxOpenCv
 ofxOsc
+ofxPoco
