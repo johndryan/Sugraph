@@ -1,6 +1,10 @@
 # Sugraph
 An interactive learning toy for my daughter's magnet wall.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/johndryan/Sugraph/master/documentation/photos/180521_early_prototype.jpg" />
+</p>
+
 ## Installation
 
 1. Use the `ProjectGenerator` (provided with OpenFrameworks) to update the base path to OpenFramework and install add-ons ([as per the ml4a guide](https://github.com/ml4a/ml4a-ofx#setup-your-project)).
@@ -15,6 +19,6 @@ This application requires the following addons:
 
 - - -
 
-## Thanks/Acknowledgments
+## Acknowledgments
 
 This project began from a fork of [DoodleClassifier](http://ml4a.github.io/guides/DoodleClassifier/) ([github](https://github.com/ml4a/ml4a-ofx/tree/master/apps/DoodleClassifier)) by [Andreas Refsgaard](https://andreasrefsgaard.dk/) and [Gene Kogan](https://www.genekogan.com/).
