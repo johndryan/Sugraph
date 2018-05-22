@@ -94,3 +94,4 @@ Desktop.ini
 
 # Imagenet Data (downloaded via setup.sh)
 /bin/data/image-net*
+/bin/data/movies/*.mov

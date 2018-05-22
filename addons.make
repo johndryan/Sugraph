@@ -1,5 +1,6 @@
 ofxCcv
 ofxCv
+ofxFailSafeVideoGrabber
 ofxGrt
 ofxGui
 ofxOpenCv

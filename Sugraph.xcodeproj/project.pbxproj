@@ -14648,6 +14648,70 @@
 				<key>sourceTree</key>
 				<string>SOURCE_ROOT</string>
 			</dict>
+			<key>28AF20B88BC0DCBC2260F346</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.c.h</string>
+				<key>fileEncoding</key>
+				<string>4</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>ofxFailSafeVideoGrabber.h</string>
+				<key>path</key>
+				<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src/ofxFailSafeVideoGrabber.h</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
+			<key>71AA8F3D098525ED724D688C</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>9309A3CAB68C8E6752C3A505</string>
+					<string>28AF20B88BC0DCBC2260F346</string>
+				</array>
+				<key>isa</key>
+				<string>PBXGroup</string>
+				<key>name</key>
+				<string>src</string>
+				<key>sourceTree</key>
+				<string>&lt;group&gt;</string>
+			</dict>
+			<key>958F18EF67D9BB5409A4487A</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>71AA8F3D098525ED724D688C</string>
+				</array>
+				<key>isa</key>
+				<string>PBXGroup</string>
+				<key>name</key>
+				<string>ofxFailSafeVideoGrabber</string>
+				<key>sourceTree</key>
+				<string>&lt;group&gt;</string>
+			</dict>
+			<key>4BB72B481D7DE9228C9CD7A4</key>
+			<dict>
+				<key>fileRef</key>
+				<string>9309A3CAB68C8E6752C3A505</string>
+				<key>isa</key>
+				<string>PBXBuildFile</string>
+			</dict>
+			<key>9309A3CAB68C8E6752C3A505</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.cpp.cpp</string>
+				<key>fileEncoding</key>
+				<string>4</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>ofxFailSafeVideoGrabber.cpp</string>
+				<key>path</key>
+				<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src/ofxFailSafeVideoGrabber.cpp</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
 			<key>D871E897F569A0138B9C1CD1</key>
 			<dict>
 				<key>fileRef</key>
@@ -15619,6 +15683,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>
@@ -15768,6 +15833,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>
@@ -15876,6 +15942,7 @@ fi
 				<array>
 					<string>795B0427BBCB5647F47B56C8</string>
 					<string>6025FAF6414C2CA589764D26</string>
+					<string>958F18EF67D9BB5409A4487A</string>
 					<string>C567550D3311A5493C1231D0</string>
 					<string>480A780D8D0308AE4A368801</string>
 					<string>A0B90D3B0ADB9C1716816714</string>
@@ -16060,6 +16127,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>
@@ -16207,6 +16275,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>
@@ -16342,6 +16411,7 @@ fi
 					<string>E59C8E038EAC218154807488</string>
 					<string>1E8D7D8960BFE7F306C8EFF8</string>
 					<string>D871E897F569A0138B9C1CD1</string>
+					<string>4BB72B481D7DE9228C9CD7A4</string>
 					<string>CE1391A7566DF12A517ED888</string>
 					<string>B57575B319586200FAE43F00</string>
 					<string>B64081BE30545F3477B9803A</string>
@@ -16597,6 +16667,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>
@@ -16731,6 +16802,7 @@ fi
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/ofxCv/include</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/libs/CLD/include/CLD</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxCv/src</string>
+						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxFailSafeVideoGrabber/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/src</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGrt/libs/grt</string>
 						<string>../By_Framework/OpenFrameworks/of_v0.10.0_osx_release/addons/ofxGui/src</string>

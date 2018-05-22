@@ -8,12 +8,17 @@
 #include "ofxCcv.h"
 #include "ofxOsc.h"
 #include "ofxXmlPoco.h"
+#include "ofxFailSafeVideoGrabber.h"
 
 using namespace ofxCv;
 using namespace cv;
 
 //#define RELEASE
 
+// Video or webcam?
+#define USE_VIDEO_FILE_INSTEAD_OF_WEBCAM
+// Speak?
+// #define USE_SYSTEM_SPEECH
 
 // where to send osc messages by default
 #define DEFAULT_OSC_DESTINATION "localhost"
@@ -62,7 +67,11 @@ public:
     
     int width, height;
     
-    ofVideoGrabber cam;
+    #ifdef USE_VIDEO_FILE_INSTEAD_OF_WEBCAM
+    #else
+    #endif
+    ofxFailSafeVideoGrabber cam;
+    
     ContourFinder contourFinder, contourFinder2;
     ofFbo fbo;
     ofxCvGrayscaleImage grayImage;

@@ -22,9 +22,12 @@ void ofApp::setup(){
     
     ccv.setup(ofToDataPath("image-net-2012.sqlite3"));
 
-    cam.setDeviceID(0);
-    cam.setup(width, height);
-
+    cam.start(width, height, 30, true, ofToDataPath("movies/demofeed.mp4"));
+    #ifdef USE_VIDEO_FILE_INSTEAD_OF_WEBCAM
+    ofLog(OF_LOG_NOTICE, "Using Video File instead of Webcam stream");
+    cam.forceMovie();
+    #endif
+    
     bAdd.addListener(this, &ofApp::addSamplesToTrainingSetNext);
     bTrain.addListener(this, &ofApp::trainClassifier);
     bClassify.addListener(this, &ofApp::classifyNext);
@@ -278,11 +281,15 @@ void ofApp::classifyCurrentSamples() {
     if (allFoundChars != theseChars) {
         // New letter/order found
         ofLog(OF_LOG_NOTICE, "New letters found: "+theseChars);
+        #ifdef USE_SYSTEM_SPEECH
         string cmd = "say '" + theseChars + "'";
         system(cmd.c_str());
+        #endif
         if (theseChars == "E M B E R ") {
             ofLog(OF_LOG_NOTICE, "EMBER FOUND!");
+            #ifdef USE_SYSTEM_SPEECH
             system("say 'You spelled Ember'");
+            #endif
         }
         allFoundChars = theseChars;
     }
