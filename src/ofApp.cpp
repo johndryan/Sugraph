@@ -35,20 +35,6 @@ void ofApp::setup(){
     bLoad.addListener(this, &ofApp::load);
     trainingLabel.addListener(this, &ofApp::setTrainingLabel);
     
-    // load settings from file
-    ofxXmlPoco xml;
-    xml.load(ofToDataPath("settings_sugraphclassifier.xml"));
-    xml.setTo("SugraphOSC");
-    if (xml.exists("classes") && xml.setTo("classes") && xml.exists("class[0]")) {
-        xml.setTo("class[0]");
-        classNames.clear();
-        do {
-            string newClass = xml.getValue();
-            classNames.push_back(newClass);
-        }
-        while(xml.setToSibling());
-    }
-    
     gui.setup();
     gui.setName("SugraphClassifier");
     ofParameterGroup gCv, gCvTracker;

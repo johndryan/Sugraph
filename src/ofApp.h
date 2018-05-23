@@ -35,12 +35,12 @@ class ofApp : public ofBaseApp
 {
 public:
 
-    // default class names if none found in settings_doodleclassifier.xml
     vector<string> classNames =
     {
-        "circle",
-        "star",
-        "arrow"
+        "E",
+        "M",
+        "B",
+        "R"
     };
 
     void setup();
