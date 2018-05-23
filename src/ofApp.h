@@ -9,6 +9,7 @@
 #include "ofxOsc.h"
 #include "ofxXmlPoco.h"
 #include "ofxFailSafeVideoGrabber.h"
+#include "letter.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -74,11 +75,12 @@ public:
     ofxPanel gui;
     ofxToggle bRunning, bPause;
     ofxButton bAdd, bTrain, bClassify, bSave, bLoad;
-    ofParameter<float> minArea, maxArea, threshold;
+    ofParameter<float> minArea, maxArea, threshold, trackerPersist, trackerDist;
     ofParameter<int> nDilate;
     ofParameter<int> trainingLabel;
     
     vector<FoundSquare> foundSquares;
+    ofxCv::RectTrackerFollower<Letter> letterTracker;
     
     ClassificationData trainingData;
     GestureRecognitionPipeline pipeline;

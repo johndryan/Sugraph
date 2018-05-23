@@ -51,12 +51,15 @@ void ofApp::setup(){
     
     gui.setup();
     gui.setName("SugraphClassifier");
-    ofParameterGroup gCv;
+    ofParameterGroup gCv, gCvTracker;
     gCv.setName("CV initial");
     gCv.add(minArea.set("Min area", 10, 1, 100));
     gCv.add(maxArea.set("Max area", 200, 1, 500));
     gCv.add(threshold.set("Threshold", 128, 0, 255));
     gCv.add(nDilate.set("Dilations", 1, 0, 8));
+    gCvTracker.setName("Contour Tracker");
+    gCvTracker.add(trackerPersist.set("Persistance (Frames)", 60, 0, 120));
+    gCvTracker.add(trackerDist.set("Distance (Pixels)", 32, 10, 100));
     gui.add(trainingLabel.set("Training Label", 0, 0, classNames.size()-1));
     gui.add(bPause.setup("Pause Video", false));
     gui.add(bAdd.setup("Add samples"));
@@ -66,6 +69,7 @@ void ofApp::setup(){
     gui.add(bSave.setup("Save"));
     gui.add(bLoad.setup("Load"));
     gui.add(gCv);
+    gui.add(gCvTracker);
     gui.setPosition(0, 400);
     gui.loadFromFile("settings_sugraphclassifier_cv.xml");
     
@@ -81,6 +85,11 @@ void ofApp::setup(){
     adaboost.enableNullRejection(false);
     adaboost.setNullRejectionCoeff(3);
     pipeline.setClassifier(adaboost);
+    
+    // wait before forgetting something
+    letterTracker.setPersistence(trackerPersist);
+    // an object can move up to X pixels per frame
+    letterTracker.setMaximumDistance(trackerDist);
 }
 
 //--------------------------------------------------------------
@@ -130,6 +139,9 @@ void ofApp::update(){
         contourFinder2.setThreshold(127);
         contourFinder2.findContours(pixels);
         contourFinder2.setFindHoles(true);
+        letterTracker.setPersistence(trackerPersist);
+        letterTracker.setMaximumDistance(trackerDist);
+        letterTracker.track(contourFinder2.getBoundingRects());
         
         if (toAddSamples) {
             addSamplesToTrainingSet();
@@ -176,7 +188,12 @@ void ofApp::draw(){
     ofTranslate(2*width, 20);
     fbo.draw(0, 0);
     ofSetColor(0, 255, 0);
-    contourFinder2.draw();
+    //contourFinder2.draw();
+    // Draw tracker labels
+    vector<Letter>& letters = letterTracker.getFollowers();
+    for(int i = 0; i < letters.size(); i++) {
+        letters[i].draw();
+    }
     ofDrawBitmapStringHighlight("merged", 0, 0);
     ofPopMatrix();
     ofPopStyle();
