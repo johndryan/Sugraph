@@ -1,16 +1,9 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void FoundSquare::draw() {
-    img.draw(0, 0);
-    string labelStr = "no class";
-    labelStr = (isPrediction?"predicted: ":"assigned: ")+label;
-    ofDrawBitmapStringHighlight(labelStr, 4, img.getHeight()-22);
-    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}, area="+ofToString(area), 4, img.getHeight()-5);
-}
 
-bool isFoundSquareRightOfOther( FoundSquare &a, FoundSquare &b){
-    return a.rect.x > b.rect.x;
+bool isFoundSquareRightOfOther( Letter &a, Letter &b){
+    return a.getRect().x > b.getRect().x;
 }
 
 //--------------------------------------------------------------
@@ -129,6 +122,19 @@ void ofApp::update(){
         letterTracker.setMaximumDistance(trackerDist);
         letterTracker.track(contourFinder2.getBoundingRects());
         
+        // update new Letters with image, then classify
+        vector<Letter>& letters = letterTracker.getFollowers();
+        const vector<unsigned int>& newLabels = letterTracker.getNewLabels();
+        for(int i = 0; i < newLabels.size(); i++) {
+            const int index = letterTracker.getIndexFromLabel(newLabels[i]);
+            letters[index].setImage(&colorImage);
+            // Only classify if system is in classfiying state
+            // TODO: update classify system state here
+//            if (toClassify) {
+//            letters[index].classify();
+//            }
+        }
+        
         if (toAddSamples) {
             addSamplesToTrainingSet();
             toAddSamples = false;
@@ -138,7 +144,7 @@ void ofApp::update(){
             toClassify = false;
         }
     }
-    
+
 }
 
 //--------------------------------------------------------------
@@ -190,12 +196,12 @@ void ofApp::draw(){
     ofPushMatrix();
     ofPushStyle();
     ofTranslate(210, 0.75*height+25);
-    int nPerRow = max(5, (int) ceil(foundSquares.size()/2.0));
+    int nPerRow = max(5, (int) ceil(letters.size()/2.0));
     ofTranslate(-ofMap(ofGetMouseX(), 0, ofGetWidth(), 0, max(0,nPerRow-5)*226), 0);
-    for (int i=0; i<foundSquares.size(); i++) {
+    for (int i=0; i<letters.size(); i++) {
         ofPushMatrix();
         ofTranslate(226*(i%nPerRow), 240*floor(i/nPerRow));
-        foundSquares[i].draw();
+        letters[i].drawThumb();
         ofPopMatrix();
     }
     ofPopMatrix();
@@ -210,33 +216,33 @@ void ofApp::exit() {
 }
 
 //--------------------------------------------------------------
-void ofApp::gatherFoundSquares() {
-    foundSquares.clear();
-    for (int i=0; i<contourFinder2.size(); i++) {
-        FoundSquare fs;
-        fs.rect = contourFinder2.getBoundingRect(i);
-        fs.area = contourFinder2.getContourArea(i);
-        fs.img.setFromPixels(cam.getPixels());
-        fs.img.crop(fs.rect.x, fs.rect.y, fs.rect.width, fs.rect.height);
-        fs.img.resize(224, 224);
-        foundSquares.push_back(fs);
-    }
-    // Sort by X position
-    ofSort(foundSquares,isFoundSquareRightOfOther);
+void ofApp::gatherFoundSquares() {    
+//    foundSquares.clear();
+//    for (int i=0; i<contourFinder2.size(); i++) {
+//        FoundSquare fs;
+//        fs.rect = contourFinder2.getBoundingRect(i);
+//        fs.area = contourFinder2.getContourArea(i);
+//        fs.img.setFromPixels(cam.getPixels());
+//        fs.img.crop(fs.rect.x, fs.rect.y, fs.rect.width, fs.rect.height);
+//        fs.img.resize(224, 224);
+//        foundSquares.push_back(fs);
+//    }
+//    // Sort by X position
+//    ofSort(foundSquares,isFoundSquareRightOfOther);
 }
 
 //--------------------------------------------------------------
 void ofApp::addSamplesToTrainingSet() {
-    ofLog(OF_LOG_NOTICE, "Adding samples...");
-    gatherFoundSquares();
-    for (int i=0; i<foundSquares.size(); i++) {
-        foundSquares[i].label = classNames[trainingLabel];
-        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
-        VectorFloat inputVector(encoding.size());
-        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
-        trainingData.addSample(trainingLabel, inputVector);
-        ofLog(OF_LOG_NOTICE, " Added sample #"+ofToString(i)+" label="+ofToString(trainingLabel));
-    }
+//    ofLog(OF_LOG_NOTICE, "Adding samples...");
+//    gatherFoundSquares();
+//    for (int i=0; i<foundSquares.size(); i++) {
+//        foundSquares[i].label = classNames[trainingLabel];
+//        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
+//        VectorFloat inputVector(encoding.size());
+//        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
+//        trainingData.addSample(trainingLabel, inputVector);
+//        ofLog(OF_LOG_NOTICE, " Added sample #"+ofToString(i)+" label="+ofToString(trainingLabel));
+//    }
 }
 
 //--------------------------------------------------------------
@@ -251,38 +257,38 @@ void ofApp::trainClassifier() {
 
 //--------------------------------------------------------------
 void ofApp::classifyCurrentSamples() {
-    ofLog(OF_LOG_NOTICE, "Classifiying on frame "+ofToString(ofGetFrameNum()));
-    gatherFoundSquares();
-    string theseChars = "";
-    for (int i=0; i<foundSquares.size(); i++) {
-        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
-        VectorFloat inputVector(encoding.size());
-        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
-        if (pipeline.predict(inputVector)) {
-            // gt classification
-            int label = pipeline.getPredictedClassLabel();
-            foundSquares[i].isPrediction = true;
-            foundSquares[i].label = classNames[label];
-
-            // Add to allChars
-            theseChars += foundSquares[i].label+" ";
-        }
-    }
-    if (allFoundChars != theseChars) {
-        // New letter/order found
-        ofLog(OF_LOG_NOTICE, "New letters found: "+theseChars);
-        #ifdef USE_SYSTEM_SPEECH
-        string cmd = "say '" + theseChars + "'";
-        system(cmd.c_str());
-        #endif
-        if (theseChars == "E M B E R ") {
-            ofLog(OF_LOG_NOTICE, "EMBER FOUND!");
-            #ifdef USE_SYSTEM_SPEECH
-            system("say 'You spelled Ember'");
-            #endif
-        }
-        allFoundChars = theseChars;
-    }
+//    ofLog(OF_LOG_NOTICE, "Classifiying on frame "+ofToString(ofGetFrameNum()));
+//    gatherFoundSquares();
+//    string theseChars = "";
+//    for (int i=0; i<foundSquares.size(); i++) {
+//        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
+//        VectorFloat inputVector(encoding.size());
+//        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
+//        if (pipeline.predict(inputVector)) {
+//            // gt classification
+//            int label = pipeline.getPredictedClassLabel();
+//            foundSquares[i].isPrediction = true;
+//            foundSquares[i].label = classNames[label];
+//
+//            // Add to allChars
+//            theseChars += foundSquares[i].label+" ";
+//        }
+//    }
+//    if (allFoundChars != theseChars) {
+//        // New letter/order found
+//        ofLog(OF_LOG_NOTICE, "New letters found: "+theseChars);
+//        #ifdef USE_SYSTEM_SPEECH
+//        string cmd = "say '" + theseChars + "'";
+//        system(cmd.c_str());
+//        #endif
+//        if (theseChars == "E M B E R ") {
+//            ofLog(OF_LOG_NOTICE, "EMBER FOUND!");
+//            #ifdef USE_SYSTEM_SPEECH
+//            system("say 'You spelled Ember'");
+//            #endif
+//        }
+//        allFoundChars = theseChars;
+//    }
 }
 
 //--------------------------------------------------------------

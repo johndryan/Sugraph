@@ -21,16 +21,6 @@ using namespace cv;
 // Speak?
 // #define USE_SYSTEM_SPEECH
 
-struct FoundSquare {
-    ofImage img;
-    string label;
-    bool isPrediction = false;
-    cv::Rect rect;
-    float area;
-    void draw();
-};
-
-
 class ofApp : public ofBaseApp
 {
 public:
@@ -79,7 +69,6 @@ public:
     ofParameter<int> nDilate;
     ofParameter<int> trainingLabel;
     
-    vector<FoundSquare> foundSquares;
     ofxCv::RectTrackerFollower<Letter> letterTracker;
     
     ClassificationData trainingData;
