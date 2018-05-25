@@ -25,6 +25,12 @@ class ofApp : public ofBaseApp
 {
 public:
 
+    enum sugraphSystemStates: short{
+        ADDING_SAMPLES,
+        TRAINING,
+        CLASSIFYING
+    };
+    
     vector<string> classNames =
     {
         "E",
@@ -52,9 +58,6 @@ public:
     
     int width, height;
     
-    #ifdef USE_VIDEO_FILE_INSTEAD_OF_WEBCAM
-    #else
-    #endif
     ofxFailSafeVideoGrabber cam;
     
     ContourFinder contourFinder, contourFinder2;
@@ -76,5 +79,9 @@ public:
     ofxCcv ccv;
     bool isTrained, toAddSamples, toClassify;
     
+    sugraphSystemStates systemState;
+    
     string allFoundChars;
+    
+    ofImage imgTest;
 };

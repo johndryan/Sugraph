@@ -11,13 +11,14 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+#include "ofxGui.h"
 
 using namespace ofxCv;
 using namespace cv;
 
 class Letter : public ofxCv::RectFollower {
 protected:
-    string characterLabel;
+    ofParameter<string> characterLabel;
     
     ofImage img;
     bool isPrediction = false;
@@ -25,16 +26,21 @@ protected:
     
     ofColor color;
     ofVec2f position, smooth;
+    
+    // Maybe replace with a more lightweight approach than a full GUI for each? Only needed for training
+    ofxPanel gui;
+    ofxButton buttonDelete;
 public:
     Letter(){}
     void setup(const cv::Rect& track);
-    void setImage(const ofxCvColorImage * camImage);
+    void setImage(const ofImage & _img);
     void classify();
     void update(const cv::Rect& track);
     void kill();
     void draw();
-    void drawThumb();
+    void drawThumb(int size);
     cv::Rect getRect();
+    int getLabel();
 };
 
 

@@ -9,6 +9,7 @@ bool isFoundSquareRightOfOther( Letter &a, Letter &b){
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowShape(1600, 900);
+    systemState = ADDING_SAMPLES;
     
     width = 640;
     height = 480;
@@ -54,6 +55,7 @@ void ofApp::setup(){
     
     fbo.allocate(width, height);
     colorImage.allocate(width, height);
+    imgTest.allocate(width, height, OF_IMAGE_COLOR);
     grayImage.allocate(width, height);
     isTrained = false;
     toAddSamples = false;
@@ -80,6 +82,7 @@ void ofApp::update(){
     {
         // get grayscale image and threshold
         colorImage.setFromPixels(cam.getPixels());
+        imgTest.setFromPixels(colorImage.getPixels());
         grayImage.setFromColorImage(colorImage);
         for (int i=0; i<nDilate; i++) {
             grayImage.erode_3x3();
@@ -120,19 +123,43 @@ void ofApp::update(){
         contourFinder2.setFindHoles(true);
         letterTracker.setPersistence(trackerPersist);
         letterTracker.setMaximumDistance(trackerDist);
-        letterTracker.track(contourFinder2.getBoundingRects());
+        vector<unsigned int> letterTrackerLabels = letterTracker.track(contourFinder2.getBoundingRects());
         
         // update new Letters with image, then classify
         vector<Letter>& letters = letterTracker.getFollowers();
         const vector<unsigned int>& newLabels = letterTracker.getNewLabels();
+        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, "--------------------------------");
+        string message = ofToString(newLabels.size()) + " potential new letters found to track";
+        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
+        message = "newLabels (" + ofToString(newLabels.size()) + ") = " + ofToString(newLabels);
+        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
+        message = "letters (" + ofToString(letters.size()) + ") = {";
+        for (int i=0; i<letters.size(); i++) {
+            message += i;
+            message += "[";
+            message += ofToString(letters[i].getLabel());
+            message += "],";
+        }
+        message += "}";
+        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
         for(int i = 0; i < newLabels.size(); i++) {
-            const int index = letterTracker.getIndexFromLabel(newLabels[i]);
-            letters[index].setImage(&colorImage);
-            // Only classify if system is in classfiying state
-            // TODO: update classify system state here
-//            if (toClassify) {
-//            letters[index].classify();
-//            }
+            int newLabel = newLabels[i];
+            vector<unsigned int>::const_iterator index = find(letterTrackerLabels.begin(), letterTrackerLabels.end(), newLabel);
+            ofLog(OF_LOG_ERROR, message);
+            if (index != letterTrackerLabels.end()) {
+                int iteratorPosition = distance<vector<unsigned int>::const_iterator> (letterTrackerLabels.begin(), index);
+                // Should really check validity of index with follower vector here
+                // Do I need to copy of an ofImage?
+                ofImage camTempCopy;
+                camTempCopy.setFromPixels(colorImage.getPixels());
+                letters[iteratorPosition].setImage(camTempCopy);
+                
+                string message = "New letter found (Label: " + ofToString(newLabel) + ", Index of labels: " + ofToString(*index) + ", Position: " + ofToString(iteratorPosition) + ", Object Label: " + ofToString(letters[iteratorPosition].getLabel()) +").";
+                ofLog(OF_LOG_ERROR, message);
+            } else {
+                message = "No image set. Letter " + ofToString(newLabel) + " not found in letterTracker.followers";
+                ofLog(OF_LOG_ERROR, message);
+            }
         }
         
         if (toAddSamples) {
@@ -170,6 +197,11 @@ void ofApp::draw(){
     grayImage.draw(0, 0);
     ofSetColor(0, 255, 0);
     contourFinder.draw();
+    // Draw tracker labels
+    vector<Letter>& letters = letterTracker.getFollowers();
+    for(int i = 0; i < letters.size(); i++) {
+        letters[i].draw();
+    }
     ofDrawBitmapStringHighlight("thresholded", 0, 0);
     ofPopMatrix();
     ofPopStyle();
@@ -182,7 +214,6 @@ void ofApp::draw(){
     ofSetColor(0, 255, 0);
     //contourFinder2.draw();
     // Draw tracker labels
-    vector<Letter>& letters = letterTracker.getFollowers();
     for(int i = 0; i < letters.size(); i++) {
         letters[i].draw();
     }
@@ -192,16 +223,27 @@ void ofApp::draw(){
     
     ofPopMatrix();
     
+    int tileSize = 150; // 224
+    
     // draw tiles
     ofPushMatrix();
     ofPushStyle();
     ofTranslate(210, 0.75*height+25);
-    int nPerRow = max(5, (int) ceil(letters.size()/2.0));
-    ofTranslate(-ofMap(ofGetMouseX(), 0, ofGetWidth(), 0, max(0,nPerRow-5)*226), 0);
+    int nPerRow = max(8, (int) ceil(letters.size()/3.0));
+    // Basic scrolling: is there a better way?
+    ofTranslate(-ofMap(ofGetMouseX(), 0, ofGetWidth(), 0, max(0,nPerRow-5)*(tileSize+2)), 0);
     for (int i=0; i<letters.size(); i++) {
         ofPushMatrix();
-        ofTranslate(226*(i%nPerRow), 240*floor(i/nPerRow));
-        letters[i].drawThumb();
+        ofTranslate((tileSize+2)*(i%nPerRow), (tileSize+16)*floor(i/nPerRow));
+        // TODO: Fix letter thumbnail images
+        // Temp fix to show something
+//        ofImage img;
+//        img.setFromPixels(colorImage.getPixels());
+//        img.crop(letters[i].getRect().x, letters[i].getRect().y, letters[i].getRect().width, letters[i].getRect().height);
+//        img.resize(tileSize, tileSize);
+//        img.draw(0, 0);
+        // ^ remove above, and handle in class method below v
+        letters[i].drawThumb(tileSize);
         ofPopMatrix();
     }
     ofPopMatrix();

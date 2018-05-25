@@ -1,12 +1,17 @@
 <?xml version="1.0"?>
 <SugraphClassifier>
 	<D>0</D>
-	<Run>1</Run>
+	<Run>0</Run>
 	<CV_initial>
-		<Min_area>12.6173</Min_area>
-		<Max_area>39.1888</Max_area>
+		<Min_area>13.6276</Min_area>
+		<Max_area>26.4592</Max_area>
 		<Threshold>105.383</Threshold>
 		<Dilations>3</Dilations>
 	</CV_initial>
 	<E>0</E>
+	<Pause_Video>0</Pause_Video>
+	<Contour_Tracker>
+		<Persistance__Frames_>60</Persistance__Frames_>
+		<Distance__Pixels_>32</Distance__Pixels_>
+	</Contour_Tracker>
 </SugraphClassifier>

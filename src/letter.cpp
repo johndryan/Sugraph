@@ -12,20 +12,26 @@ void Letter::setup(const cv::Rect& track) {
     position = toOf(track).getCenter();
     rect = track;
     smooth = position;
-    characterLabel = "N/A";
-    // Height/width Should be inherited from main app somehow?
-    // img.allocate(640, 480, OF_IMAGE_COLOR);
+    characterLabel.set("Unknown");
+    gui.setup();
     // Should I check width/height ratio here and kill if not square?
 }
 
-void Letter::setImage(const ofxCvColorImage * camImage) {
-    string message = "setImage to " + ofToString(camImage->getWidth()) + " x " + ofToString(camImage->getHeight()) + " image.";
-    ofLog(OF_LOG_NOTICE, message);
-// COMMENTED OUT BECAUSE I CAN'T GET IT WORKING YET!
-//    img.setFromPixels(camImage->getPixels());
-//    img.update();
-//    img.crop(rect.x, rect.y, rect.width, rect.height);
-//    img.resize(224, 224);
+void Letter::setImage(const ofImage & _img) {
+    string message = "Setting Image for Letter " + ofToString(label) + " from image size " + ofToString(_img.getWidth()) + " x " + ofToString(_img.getHeight());
+    ofLog(OF_LOG_ERROR, message);
+    if (rect.x < _img.getWidth()
+        && rect.y < _img.getHeight()
+        && rect.width < _img.getWidth()
+        && rect.height < _img.getHeight()) {
+        // Copy and crop image
+        img.setFromPixels(_img.getPixels());
+        img.crop(rect.x, rect.y, rect.width, rect.height);
+        img.resize(224, 224);
+    } else {
+        string message = "Image failed to be set for Letter " + ofToString(label) + ": crop rect did not fall within bounds of passed image.";
+        ofLog(OF_LOG_ERROR, message);
+    }
 }
 
 void Letter::classify() {
@@ -57,19 +63,23 @@ void Letter::draw() {
     ofNoFill();
     ofSetColor(color);
     ofDrawCircle(position, size);
-    string labelToDraw = ofToString(label) + ": " + characterLabel;
-    ofDrawBitmapString(labelToDraw, position);
+    string labelToDraw = ofToString(label);// + ": " + characterLabel;
+    ofDrawBitmapStringHighlight(labelToDraw, position, ofColor(0,150));
     ofPopStyle();
 }
 
-void Letter::drawThumb() {
-    img.draw(0, 0);
+void Letter::drawThumb(int size) {
+    img.draw(0, 0, size, size);
     string labelStr = "no class";
-    labelStr = (isPrediction?"predicted: ":"assigned: ")+characterLabel;
-    ofDrawBitmapStringHighlight(labelStr, 4, img.getHeight()-22);
-    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, img.getHeight()-5);
+    labelStr = ofToString(getLabel())+" "+(isPrediction?"predicted: ":"assigned: ")+characterLabel;
+    ofDrawBitmapStringHighlight(labelStr, 4, 4);
+    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 21);
 }
 
 cv::Rect Letter::getRect() {
     return rect;
+}
+
+int Letter::getLabel() {
+    return label;
 }
