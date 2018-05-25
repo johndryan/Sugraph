@@ -35,6 +35,7 @@ void ofApp::setup(){
     gCv.setName("CV initial");
     gCv.add(minArea.set("Min area", 10, 1, 100));
     gCv.add(maxArea.set("Max area", 200, 1, 500));
+    gCv.add(squareness.set("Squareness (W/H)", 1.5, 1, 2));
     gCv.add(threshold.set("Threshold", 128, 0, 255));
     gCv.add(nDilate.set("Dilations", 1, 0, 8));
     gCvTracker.setName("Contour Tracker");
@@ -121,44 +122,32 @@ void ofApp::update(){
         contourFinder2.setThreshold(127);
         contourFinder2.findContours(pixels);
         contourFinder2.setFindHoles(true);
+        
+        // letterTracker
+        // Could all be handled by a single manager Class?
         letterTracker.setPersistence(trackerPersist);
         letterTracker.setMaximumDistance(trackerDist);
         vector<unsigned int> letterTrackerLabels = letterTracker.track(contourFinder2.getBoundingRects());
-        
-        // update new Letters with image, then classify
         vector<Letter>& letters = letterTracker.getFollowers();
         const vector<unsigned int>& newLabels = letterTracker.getNewLabels();
-        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, "--------------------------------");
-        string message = ofToString(newLabels.size()) + " potential new letters found to track";
-        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
-        message = "newLabels (" + ofToString(newLabels.size()) + ") = " + ofToString(newLabels);
-        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
-        message = "letters (" + ofToString(letters.size()) + ") = {";
-        for (int i=0; i<letters.size(); i++) {
-            message += i;
-            message += "[";
-            message += ofToString(letters[i].getLabel());
-            message += "],";
-        }
-        message += "}";
-        if (newLabels.size() > 0) ofLog(OF_LOG_ERROR, message);
+
+        // Find the Letter for any new Labels and set their image
         for(int i = 0; i < newLabels.size(); i++) {
             int newLabel = newLabels[i];
+            // Find position of Letter with that Label
             vector<unsigned int>::const_iterator index = find(letterTrackerLabels.begin(), letterTrackerLabels.end(), newLabel);
-            ofLog(OF_LOG_ERROR, message);
             if (index != letterTrackerLabels.end()) {
                 int iteratorPosition = distance<vector<unsigned int>::const_iterator> (letterTrackerLabels.begin(), index);
-                // Should really check validity of index with follower vector here
-                // Do I need to copy of an ofImage?
-                ofImage camTempCopy;
-                camTempCopy.setFromPixels(colorImage.getPixels());
-                letters[iteratorPosition].setImage(camTempCopy);
-                
-                string message = "New letter found (Label: " + ofToString(newLabel) + ", Index of labels: " + ofToString(*index) + ", Position: " + ofToString(iteratorPosition) + ", Object Label: " + ofToString(letters[iteratorPosition].getLabel()) +").";
-                ofLog(OF_LOG_ERROR, message);
-            } else {
-                message = "No image set. Letter " + ofToString(newLabel) + " not found in letterTracker.followers";
-                ofLog(OF_LOG_ERROR, message);
+                // If iteratorPosition is inside letters, then update image
+                if (iteratorPosition >= 0 && iteratorPosition < letters.size()) {
+                    // Kill if not square enough, helpful for my letters
+                    if (letters[iteratorPosition].isItSquareEnough(squareness)) {
+                        // Do I need to copy of an ofImage?
+                        ofImage camTempCopy;
+                        camTempCopy.setFromPixels(colorImage.getPixels());
+                        letters[iteratorPosition].setImage(camTempCopy);
+                    }
+                }
             }
         }
         

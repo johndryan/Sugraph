@@ -14,12 +14,9 @@ void Letter::setup(const cv::Rect& track) {
     smooth = position;
     characterLabel.set("Unknown");
     gui.setup();
-    // Should I check width/height ratio here and kill if not square?
 }
 
 void Letter::setImage(const ofImage & _img) {
-    string message = "Setting Image for Letter " + ofToString(label) + " from image size " + ofToString(_img.getWidth()) + " x " + ofToString(_img.getHeight());
-    ofLog(OF_LOG_ERROR, message);
     if (rect.x < _img.getWidth()
         && rect.y < _img.getHeight()
         && rect.width < _img.getWidth()
@@ -30,12 +27,11 @@ void Letter::setImage(const ofImage & _img) {
         img.resize(224, 224);
     } else {
         string message = "Image failed to be set for Letter " + ofToString(label) + ": crop rect did not fall within bounds of passed image.";
-        ofLog(OF_LOG_ERROR, message);
+        ofLog(OF_LOG_NOTICE, message);
     }
 }
 
 void Letter::classify() {
-    // if img is Set
     if (img.isAllocated()) {
         
         // Classify image here
@@ -74,6 +70,15 @@ void Letter::drawThumb(int size) {
     labelStr = ofToString(getLabel())+" "+(isPrediction?"predicted: ":"assigned: ")+characterLabel;
     ofDrawBitmapStringHighlight(labelStr, 4, 4);
     ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 21);
+}
+
+bool Letter::isItSquareEnough(float squareness) {
+    if (rect.width > squareness*rect.height || rect.height > squareness*rect.width) {
+        kill();
+        return false;
+    } else {
+        return true;
+    }
 }
 
 cv::Rect Letter::getRect() {

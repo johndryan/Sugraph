@@ -39,6 +39,7 @@ public:
     void kill();
     void draw();
     void drawThumb(int size);
+    bool isItSquareEnough(float squareness);
     cv::Rect getRect();
     int getLabel();
 };
