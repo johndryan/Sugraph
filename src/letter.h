@@ -42,6 +42,13 @@ public:
     bool isItSquareEnough(float squareness);
     cv::Rect getRect();
     int getLabel();
+    
+    enum classificationState: short{
+        NO_IMAGE,
+        UNCLASSIFIED_IMAGE,
+        CLASSIFIED_IMAGE
+    };
+    classificationState state;
 };
 
 

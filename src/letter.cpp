@@ -13,6 +13,7 @@ void Letter::setup(const cv::Rect& track) {
     rect = track;
     smooth = position;
     characterLabel.set("Unknown");
+    state = NO_IMAGE;
     gui.setup();
 }
 
@@ -25,6 +26,7 @@ void Letter::setImage(const ofImage & _img) {
         img.setFromPixels(_img.getPixels());
         img.crop(rect.x, rect.y, rect.width, rect.height);
         img.resize(224, 224);
+        state = UNCLASSIFIED_IMAGE;
     } else {
         string message = "Image failed to be set for Letter " + ofToString(label) + ": crop rect did not fall within bounds of passed image.";
         ofLog(OF_LOG_NOTICE, message);
@@ -32,7 +34,7 @@ void Letter::setImage(const ofImage & _img) {
 }
 
 void Letter::classify() {
-    if (img.isAllocated()) {
+    if (state == UNCLASSIFIED_IMAGE) {
         
         // Classify image here
         isPrediction = true;
