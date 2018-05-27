@@ -5,6 +5,8 @@ An interactive learning toy for my daughter's magnet wall. It uses OpenCV and a 
   <img src="https://raw.githubusercontent.com/johndryan/Sugraph/master/documentation/photos/180521_early_prototype.jpg" />
 </p>
 
+Built with [OpenFrameworks](https://openframeworks.cc) (v0.10.0)
+
 ## Installation
 
 1. Use the `ProjectGenerator` (provided with OpenFrameworks) to update the base path to OpenFramework and install add-ons ([as per the ml4a guide](https://github.com/ml4a/ml4a-ofx#setup-your-project)).
