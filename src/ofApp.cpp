@@ -12,6 +12,7 @@ void ofApp::setup(){
     
     width = 640;
     height = 480;
+    scrollPos = 0;
     
     ccv.setup(ofToDataPath("image-net-2012.sqlite3"));
 
@@ -172,12 +173,9 @@ void ofApp::update(){
         vector<Letter>& letters = letterTracker.getFollowers();
         ofLog(OF_LOG_NOTICE, "Classifying all letters…");
         for (Letter & letter : letters) {
-            string message = "Letter " + ofToString(letter.getLabel());
             if (letter.readyToClassify()) {
-                message += "attempting to classify.";
                 classifyLetter(letter);
             }
-            ofLog(OF_LOG_NOTICE, message);
         }
     }
 }
@@ -239,7 +237,7 @@ void ofApp::draw(){
     ofTranslate(210, 0.75*height+25);
     int nPerRow = max(8, (int) ceil(letters.size()/3.0));
     // Basic scrolling: is there a better way?
-    ofTranslate(-ofMap(ofGetMouseX(), 0, ofGetWidth(), 0, max(0,nPerRow-5)*(tileSize+2)), 0);
+    ofTranslate(-ofMap(scrollPos, 0, ofGetWidth(), 0, max(0,nPerRow-5)*(tileSize+2)), 0);
     for (int i=0; i<letters.size(); i++) {
         ofPushMatrix();
         ofTranslate((tileSize+2)*(i%nPerRow), (tileSize+16)*floor(i/nPerRow));
@@ -376,4 +374,21 @@ void ofApp::setSystemStateTo(sugraphSystemStates _state) {
             break;
     }
     ofLog(OF_LOG_NOTICE, message);
+}
+
+//--------------------------------------------------------------
+// KEYBOARD & MOUSE
+//--------------------------------------------------------------
+
+void ofApp::mouseDragged(int x, int y, int button) {
+
+}
+void ofApp::mousePressed(int x, int y, int button){
+
+}
+void ofApp::mouseReleased(int x, int y, int button){
+
+}
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
+    scrollPos += scrollX * 10;
 }

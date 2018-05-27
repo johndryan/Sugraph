@@ -47,6 +47,12 @@ public:
     void draw();
     void exit();
     
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    void mouseScrolled(int x, int y, float scrollX, float scrollY);
+    float scrollPos;
+    
     void setTrainingLabel(int & label_);
     void addSamplesToTrainingSet();
     void trainClassifier();
