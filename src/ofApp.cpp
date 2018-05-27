@@ -9,7 +9,6 @@ bool isFoundSquareRightOfOther( Letter &a, Letter &b){
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowShape(1600, 900);
-    systemState = ADDING_SAMPLES;
     
     width = 640;
     height = 480;
@@ -24,20 +23,30 @@ void ofApp::setup(){
     
     bAdd.addListener(this, &ofApp::addSamplesToTrainingSetNext);
     bTrain.addListener(this, &ofApp::trainClassifier);
-    bClassify.addListener(this, &ofApp::classifyNext);
-    bSave.addListener(this, &ofApp::save);
-    bLoad.addListener(this, &ofApp::load);
+    bSave.addListener(this, &ofApp::saveModel);
+    bLoad.addListener(this, &ofApp::loadModel);
     trainingLabel.addListener(this, &ofApp::setTrainingLabel);
+    
+    // There's got to be a better way to toggle an enum in ofxGui?
+    systemState = CALIBRATION;
+    inCalibrationState.addListener(this, &ofApp::enterCalibrationState);
+    inAddingSamplesState.addListener(this, &ofApp::enterAddingSamplesState);
+    inTrainingStateOn.addListener(this, &ofApp::enterTrainingState);
+    inClassifyingState.addListener(this, &ofApp::enterClassifyingState);
+    gSysState.setName("System State");
+    gSysState.add(inCalibrationState.set("Calibrating", true));
+    gSysState.add(inAddingSamplesState.set("Adding Samples", false));
+    gSysState.add(inTrainingStateOn.set("Train New Model", false));
+    gSysState.add(inClassifyingState.set("Classifying", false));
     
     gui.setup();
     gui.setName("SugraphClassifier");
-    ofParameterGroup gCv, gCvTracker;
     gCv.setName("CV initial");
-    gCv.add(minArea.set("Min area", 10, 1, 100));
-    gCv.add(maxArea.set("Max area", 200, 1, 500));
+    gCv.add(minArea.set("Min area", 14, 1, 100));
+    gCv.add(maxArea.set("Max area", 26, 1, 500));
     gCv.add(squareness.set("Squareness (W/H)", 1.5, 1, 2));
-    gCv.add(threshold.set("Threshold", 128, 0, 255));
-    gCv.add(nDilate.set("Dilations", 1, 0, 8));
+    gCv.add(threshold.set("Threshold", 105, 0, 255));
+    gCv.add(nDilate.set("Dilations", 3, 0, 8));
     gCvTracker.setName("Contour Tracker");
     gCvTracker.add(trackerPersist.set("Persistance (Frames)", 60, 0, 120));
     gCvTracker.add(trackerDist.set("Distance (Pixels)", 32, 10, 100));
@@ -49,6 +58,8 @@ void ofApp::setup(){
     gui.add(bClassify.setup("Classify"));
     gui.add(bSave.setup("Save"));
     gui.add(bLoad.setup("Load"));
+    
+    gui.add(gSysState);
     gui.add(gCv);
     gui.add(gCvTracker);
     gui.setPosition(0, 400);
@@ -56,11 +67,9 @@ void ofApp::setup(){
     
     fbo.allocate(width, height);
     colorImage.allocate(width, height);
-    imgTest.allocate(width, height, OF_IMAGE_COLOR);
     grayImage.allocate(width, height);
     isTrained = false;
     toAddSamples = false;
-    toClassify = false;
     
     trainingData.setNumDimensions(4096);
     AdaBoost adaboost;
@@ -83,7 +92,6 @@ void ofApp::update(){
     {
         // get grayscale image and threshold
         colorImage.setFromPixels(cam.getPixels());
-        imgTest.setFromPixels(colorImage.getPixels());
         grayImage.setFromColorImage(colorImage);
         for (int i=0; i<nDilate; i++) {
             grayImage.erode_3x3();
@@ -151,16 +159,27 @@ void ofApp::update(){
             }
         }
         
-        if (toAddSamples) {
-            addSamplesToTrainingSet();
-            toAddSamples = false;
-        }
-        else if (isTrained && (bRunning || toClassify)) {
-            classifyCurrentSamples();
-            toClassify = false;
-        }
+//        if (toAddSamples) {
+//            addSamplesToTrainingSet();
+//            toAddSamples = false;
+//        }
     }
 
+    // HANDLE VARIOUS SYSTEM STATES
+    
+    if (systemState == CLASSIFYING) {
+        // Classify all letters that are ready
+        vector<Letter>& letters = letterTracker.getFollowers();
+        ofLog(OF_LOG_NOTICE, "Classifying all letters…");
+        for (Letter & letter : letters) {
+            string message = "Letter " + ofToString(letter.getLabel());
+            if (letter.readyToClassify()) {
+                message += "attempting to classify.";
+                classifyLetter(letter);
+            }
+            ofLog(OF_LOG_NOTICE, message);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -247,22 +266,6 @@ void ofApp::exit() {
 }
 
 //--------------------------------------------------------------
-void ofApp::gatherFoundSquares() {    
-//    foundSquares.clear();
-//    for (int i=0; i<contourFinder2.size(); i++) {
-//        FoundSquare fs;
-//        fs.rect = contourFinder2.getBoundingRect(i);
-//        fs.area = contourFinder2.getContourArea(i);
-//        fs.img.setFromPixels(cam.getPixels());
-//        fs.img.crop(fs.rect.x, fs.rect.y, fs.rect.width, fs.rect.height);
-//        fs.img.resize(224, 224);
-//        foundSquares.push_back(fs);
-//    }
-//    // Sort by X position
-//    ofSort(foundSquares,isFoundSquareRightOfOther);
-}
-
-//--------------------------------------------------------------
 void ofApp::addSamplesToTrainingSet() {
 //    ofLog(OF_LOG_NOTICE, "Adding samples...");
 //    gatherFoundSquares();
@@ -287,39 +290,20 @@ void ofApp::trainClassifier() {
 }
 
 //--------------------------------------------------------------
-void ofApp::classifyCurrentSamples() {
-//    ofLog(OF_LOG_NOTICE, "Classifiying on frame "+ofToString(ofGetFrameNum()));
-//    gatherFoundSquares();
-//    string theseChars = "";
-//    for (int i=0; i<foundSquares.size(); i++) {
-//        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
-//        VectorFloat inputVector(encoding.size());
-//        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
-//        if (pipeline.predict(inputVector)) {
-//            // gt classification
-//            int label = pipeline.getPredictedClassLabel();
-//            foundSquares[i].isPrediction = true;
-//            foundSquares[i].label = classNames[label];
-//
-//            // Add to allChars
-//            theseChars += foundSquares[i].label+" ";
-//        }
-//    }
-//    if (allFoundChars != theseChars) {
-//        // New letter/order found
-//        ofLog(OF_LOG_NOTICE, "New letters found: "+theseChars);
-//        #ifdef USE_SYSTEM_SPEECH
-//        string cmd = "say '" + theseChars + "'";
-//        system(cmd.c_str());
-//        #endif
-//        if (theseChars == "E M B E R ") {
-//            ofLog(OF_LOG_NOTICE, "EMBER FOUND!");
-//            #ifdef USE_SYSTEM_SPEECH
-//            system("say 'You spelled Ember'");
-//            #endif
-//        }
-//        allFoundChars = theseChars;
-//    }
+void ofApp::classifyLetter(Letter & letter) {
+    ofLog(OF_LOG_NOTICE, "Classifiying Letter "+ofToString(letter.getLabel()));
+    vector<float> encoding = ccv.encode(letter.getImage(), ccv.numLayers()-1);
+    VectorFloat inputVector(encoding.size());
+    for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
+    if (pipeline.predict(inputVector)) {
+        // gt classification
+        int classification = pipeline.getPredictedClassLabel();
+        string letterClassLookup = classNames[classification];
+        letter.classify(letterClassLookup, true);
+    } else {
+        // TODO Does this mean prediction was negative or failed?
+        letter.classify("Unknown", false);
+    }
 }
 
 //--------------------------------------------------------------
@@ -328,22 +312,68 @@ void ofApp::setTrainingLabel(int & label_) {
 }
 
 //--------------------------------------------------------------
-void ofApp::save() {
+void ofApp::saveModel() {
     pipeline.save(ofToDataPath("sugraphclassifier_model.grt"));
 }
 
 //--------------------------------------------------------------
-void ofApp::load() {
+void ofApp::loadModel() {
+    ofLog(OF_LOG_NOTICE, "LOAD CLASSIFIER MODEL");
     pipeline.load(ofToDataPath("sugraphclassifier_model.grt"));
     isTrained = true;
 }
 
 //--------------------------------------------------------------
-void ofApp::classifyNext() {
-    toClassify = true;
+void ofApp::addSamplesToTrainingSetNext() {
+    toAddSamples = true;
 }
 
 //--------------------------------------------------------------
-void ofApp::addSamplesToTrainingSetNext() {
-    toAddSamples = true;
+// Find a better way to handle this toggle…
+void ofApp::enterCalibrationState(bool& val) {
+    if (val) setSystemStateTo(CALIBRATION);
+}
+void ofApp::enterAddingSamplesState(bool& val) {
+    if (val) setSystemStateTo(ADDING_SAMPLES);
+}
+void ofApp::enterTrainingState(bool& val) {
+    if (val) setSystemStateTo(TRAINING);
+}
+void ofApp::enterClassifyingState(bool& val) {
+    // Only start classifying if trained model present
+    if (val) {
+        if (isTrained) {
+            setSystemStateTo(CLASSIFYING);
+        } else {
+            inClassifyingState = false;
+            ofLog(OF_LOG_NOTICE, "No Classifier Model. Trying loading or creating one?");
+        }
+    }
+}
+void ofApp::setSystemStateTo(sugraphSystemStates _state) {
+    systemState = _state;
+    inCalibrationState = false;
+    inAddingSamplesState = false;
+    inTrainingStateOn = false;
+    inClassifyingState = false;
+    string message = "Entering System State: ";
+    switch(_state) {
+    case CALIBRATION:
+        inCalibrationState = true;
+            message += "CALIBRATION";
+            break;
+    case ADDING_SAMPLES:
+        inAddingSamplesState = true;
+            message += "ADDING_SAMPLES";
+            break;
+    case TRAINING:
+        inTrainingStateOn = true;
+            message += "TRAINING";
+            break;
+    case CLASSIFYING:
+        inClassifyingState = true;
+            message += "CLASSIFYING";
+            break;
+    }
+    ofLog(OF_LOG_NOTICE, message);
 }

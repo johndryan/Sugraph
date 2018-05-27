@@ -11,7 +11,6 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
-#include "ofxGui.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -21,20 +20,28 @@ protected:
     ofParameter<string> characterLabel;
     
     ofImage img;
-    bool isPrediction = false;
     cv::Rect rect;
     
     ofColor color;
     ofVec2f position, smooth;
     
-    // Maybe replace with a more lightweight approach than a full GUI for each? Only needed for training
-    ofxPanel gui;
-    ofxButton buttonDelete;
+    // Should get this from an parameter in Tracker eventually
+    unsigned int ageBeforeClassifiying = 0;
+    
+    enum classificationState: short{
+        NO_IMAGE,
+        HAS_IMAGE,
+        READY_TO_CLASSIFY,
+        CLASSIFIED
+    };
+    const string getStateTitle(classificationState state);
+    classificationState state;
 public:
     Letter(){}
     void setup(const cv::Rect& track);
     void setImage(const ofImage & _img);
-    void classify();
+    ofImage getImage();
+    void classify(string _classificationLabel, bool _isPrediction);
     void update(const cv::Rect& track);
     void kill();
     void draw();
@@ -42,14 +49,7 @@ public:
     bool isItSquareEnough(float squareness);
     cv::Rect getRect();
     int getLabel();
-    
-    enum classificationState: short{
-        NO_IMAGE,
-        UNCLASSIFIED_IMAGE,
-        CLASSIFIED_IMAGE
-    };
-    classificationState state;
+    bool readyToClassify();
 };
-
 
 #endif /* letter_h */
