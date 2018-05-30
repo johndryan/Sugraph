@@ -397,20 +397,24 @@ void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 void ofApp::keyPressed  (int key){
     if (systemState == ADDING_SAMPLES) {
         if (isalnum(key) ||
-            key == OF_KEY_BACKSPACE ||
-            key == OF_KEY_DEL) {
+            (char)key == '*') {
             // TODO: encapulsate this in a class:
             vector<Letter>& letters = letterTracker.getFollowers();
             for (Letter & letter : letters) {
-                if (letter.isSelected()) {
-                    string assignedKey = ((key==OF_KEY_BACKSPACE||key==OF_KEY_DEL)?"falsePositive":ofToString((char)key));
-                    letter.assignLabel(assignedKey);
-                }
+                if (letter.isSelected()) letter.assignLabel(ofToString((char)key));
             }
         } else if (key == OF_KEY_TAB) {
+            // Deselect all letters
             vector<Letter>& letters = letterTracker.getFollowers();
             for (Letter & letter : letters) {
                 letter.setSelection(false);
+            }
+        } else if (key == OF_KEY_BACKSPACE ||
+                   key == OF_KEY_DEL) {
+            // Remove letters
+            vector<Letter>& letters = letterTracker.getFollowers();
+            for (Letter & letter : letters) {
+                if (letter.isSelected()) letter.kill();
             }
         }
     }
