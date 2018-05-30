@@ -255,15 +255,16 @@ void ofApp::setImagesForNewLettersFound() {
 
 //--------------------------------------------------------------
 void ofApp::addSamplesToTrainingSet() {
-//    ofLog(OF_LOG_NOTICE, "Adding samples...");
-//    gatherFoundSquares();
-//    for (int i=0; i<foundSquares.size(); i++) {
-//        foundSquares[i].label = classNames[trainingLabel];
-//        vector<float> encoding = ccv.encode(foundSquares[i].img, ccv.numLayers()-1);
+//    ofLog(OF_LOG_NOTICE, "Adding all samples...");
+//    vector<Letter>& letters = letterTracker.getFollowers();
+//    for (Letter & letter : letters) {
+//        vector<float> encoding = ccv.encode(letter.getImage(), ccv.numLayers()-1);
 //        VectorFloat inputVector(encoding.size());
 //        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
-//        trainingData.addSample(trainingLabel, inputVector);
-//        ofLog(OF_LOG_NOTICE, " Added sample #"+ofToString(i)+" label="+ofToString(trainingLabel));
+//        trainingData.addSample(letter.getCharacterLabel(), inputVector);
+//        ofLog(OF_LOG_NOTICE, "Added Letter #"+ofToString(letter.getLabel())+" as sample for "+ofToString(letter.getCharacterLabel()));
+//        // Mark letter as sampled?
+//        letter.setInTrainingSet();
 //    }
 }
 
@@ -280,7 +281,6 @@ void ofApp::trainClassifier() {
 
 //--------------------------------------------------------------
 void ofApp::classifyLetter(Letter & letter) {
-    ofLog(OF_LOG_NOTICE, "Classifiying Letter "+ofToString(letter.getLabel()));
     vector<float> encoding = ccv.encode(letter.getImage(), ccv.numLayers()-1);
     VectorFloat inputVector(encoding.size());
     for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];

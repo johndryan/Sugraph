@@ -80,10 +80,12 @@ void Letter::draw() {
 void Letter::drawThumb(int size, bool selectable) {
     // Only display selected states if selectable
     bool _selected = selected;
+    if (state == IN_TRAINING_SET) selectable = false;
     if (!selectable) _selected = false;
     string labelStr = "";
     ofColor foreground = (_selected?ofColor::black:ofColor::white);
     ofColor background = (_selected?ofColor::white:ofColor::black);
+    if (state == IN_TRAINING_SET) background = ofColor(70,70,70);
     // Draw image and fake stroke
     ofPushStyle();
     ofSetLineWidth(0);
@@ -92,6 +94,13 @@ void Letter::drawThumb(int size, bool selectable) {
     ofPopStyle();
     int outlineWidth = 4;
     img.draw(outlineWidth, outlineWidth, size-outlineWidth*2, size-outlineWidth*2);
+    if (state == IN_TRAINING_SET) {
+        // Fade image if in training set
+        ofPushStyle();
+        ofSetColor(70,70,70,127);
+        ofDrawRectangle(0, 0, size, size);
+        ofPopStyle();
+    }
     // Draw Labels & Checkmark
     labelStr = ofToString(getLabel())+": "+characterLabel;
     ofDrawBitmapStringHighlight(labelStr, 4, size-24, background, foreground);
@@ -139,6 +148,10 @@ int Letter::getLabel() {
     return label;
 }
 
+string Letter::getCharacterLabel() {
+    return characterLabel;
+}
+
 bool Letter::readyToClassify() {
     if (state == READY_TO_CLASSIFY) {
         return true;
@@ -151,8 +164,18 @@ bool Letter::isSelected() {
     return selected;
 }
 
+bool Letter::isLabelAssigned() {
+    return (state == LABEL_ASSIGNED);
+}
+
+void Letter::setInTrainingSet() {
+    selected = false;
+    state == IN_TRAINING_SET;
+}
+
 void Letter::setSelection(bool _selection) {
     selected = _selection;
+    if (state == IN_TRAINING_SET) selected = false;
 }
 
 const string Letter::getStateTitle(classificationState state) {
@@ -160,6 +183,7 @@ const string Letter::getStateTitle(classificationState state) {
         case NO_IMAGE: return "NO_IMAGE";
         case HAS_IMAGE: return "HAS_IMAGE";
         case LABEL_ASSIGNED: return "LABEL_ASSIGNED";
+        case IN_TRAINING_SET: return "IN_TRAINING_SET";
         case READY_TO_CLASSIFY: return "READY_TO_CLASSIFY";
         case CLASSIFIED: return "CLASSIFIED";
     }

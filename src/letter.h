@@ -32,6 +32,7 @@ protected:
         NO_IMAGE,
         HAS_IMAGE,
         LABEL_ASSIGNED,
+        IN_TRAINING_SET,
         READY_TO_CLASSIFY,
         CLASSIFIED
     };
@@ -53,9 +54,13 @@ public:
     void drawCheckmark(int x, int y, bool selected);
     bool isItSquareEnough(float squareness);
     cv::Rect getRect();
+    // It's a bit confusing that the countourtracker 'label' and the class label both use that term?
     int getLabel();
+    string getCharacterLabel();
     bool readyToClassify();
     bool isSelected();
+    bool isLabelAssigned();
+    void setInTrainingSet();
     void setSelection(bool _selected);
     bool toggleSelectedIfMouseClickIsInside(int x, int y, int thumbnailSize);
 };
