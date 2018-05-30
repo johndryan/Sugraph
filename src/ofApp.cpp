@@ -25,21 +25,19 @@ void ofApp::setup(){
     #endif
     
     bAdd.addListener(this, &ofApp::addSamplesToTrainingSetNext);
-    bTrain.addListener(this, &ofApp::trainClassifier);
     bSave.addListener(this, &ofApp::saveModel);
     bLoad.addListener(this, &ofApp::loadModel);
-    trainingLabel.addListener(this, &ofApp::setTrainingLabel);
     
     // There's got to be a better way to toggle an enum in ofxGui?
     systemState = ADDING_SAMPLES;
     inCalibrationState.addListener(this, &ofApp::enterCalibrationState);
     inAddingSamplesState.addListener(this, &ofApp::enterAddingSamplesState);
-    inTrainingStateOn.addListener(this, &ofApp::enterTrainingState);
+    inTrainingState.addListener(this, &ofApp::enterTrainingState);
     inClassifyingState.addListener(this, &ofApp::enterClassifyingState);
     gSysState.setName("System State");
     gSysState.add(inCalibrationState.set("Calibrating", (systemState==CALIBRATION)));
     gSysState.add(inAddingSamplesState.set("Adding Samples", (systemState==ADDING_SAMPLES)));
-    gSysState.add(inTrainingStateOn.set("Train New Model", (systemState==TRAINING)));
+    gSysState.add(inTrainingState.set("Train New Model", (systemState==TRAINING)));
     gSysState.add(inClassifyingState.set("Classifying", (systemState==CLASSIFYING)));
     
     gui.setup();
@@ -53,12 +51,8 @@ void ofApp::setup(){
     gCvTracker.setName("Contour Tracker");
     gCvTracker.add(trackerPersist.set("Persistance (Frames)", 60, 0, 120));
     gCvTracker.add(trackerDist.set("Distance (Pixels)", 32, 10, 100));
-    gui.add(trainingLabel.set("Training Label", 0, 0, classNames.size()-1));
     gui.add(bPause.setup("Pause Video", false));
     gui.add(bAdd.setup("Add samples"));
-    gui.add(bTrain.setup("Train"));
-    gui.add(bRunning.setup("Run", false));
-    gui.add(bClassify.setup("Classify"));
     gui.add(bSave.setup("Save"));
     gui.add(bLoad.setup("Load"));
     
@@ -280,6 +274,7 @@ void ofApp::trainClassifier() {
         ofLog(OF_LOG_NOTICE, "getNumClasses: "+ofToString(pipeline.getNumClasses()));
     }
     isTrained = true;
+    setSystemStateTo(CLASSIFYING);
     ofLog(OF_LOG_NOTICE, "Done training...");
 }
 
@@ -298,11 +293,6 @@ void ofApp::classifyLetter(Letter & letter) {
         // TODO Does this mean prediction was negative or failed?
         letter.classify("Unknown", false);
     }
-}
-
-//--------------------------------------------------------------
-void ofApp::setTrainingLabel(int & label_) {
-    trainingLabel.setName(classNames[label_]);
 }
 
 //--------------------------------------------------------------
@@ -331,7 +321,10 @@ void ofApp::enterAddingSamplesState(bool& val) {
     if (val) setSystemStateTo(ADDING_SAMPLES);
 }
 void ofApp::enterTrainingState(bool& val) {
-    if (val) setSystemStateTo(TRAINING);
+    if (val) {
+        setSystemStateTo(TRAINING);
+        trainClassifier();
+    }
 }
 void ofApp::enterClassifyingState(bool& val) {
     // Only start classifying if trained model present
@@ -348,7 +341,7 @@ void ofApp::setSystemStateTo(sugraphSystemStates _state) {
     systemState = _state;
     inCalibrationState = false;
     inAddingSamplesState = false;
-    inTrainingStateOn = false;
+    inTrainingState = false;
     inClassifyingState = false;
     string message = "Entering System State: ";
     switch(_state) {
@@ -361,7 +354,7 @@ void ofApp::setSystemStateTo(sugraphSystemStates _state) {
             message += "ADDING_SAMPLES";
             break;
     case TRAINING:
-        inTrainingStateOn = true;
+        inTrainingState = true;
             message += "TRAINING";
             break;
     case CLASSIFYING:

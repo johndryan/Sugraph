@@ -55,7 +55,6 @@ public:
     void mouseScrolled(int x, int y, float scrollX, float scrollY);
     float scrollPos;
     
-    void setTrainingLabel(int & label_);
     void addSamplesToTrainingSet();
     void trainClassifier();
     void classifyLetter(Letter & letter);
@@ -77,12 +76,12 @@ public:
     ofxCvColorImage colorImage;
     
     ofxPanel gui;
-    ofxToggle bRunning, bPause;
-    ofxButton bAdd, bTrain, bClassify, bSave, bLoad;
+    ofxToggle bPause;
+    ofxButton bAdd, bSave, bLoad;
     ofParameterGroup gSysState, gCv, gCvTracker;
     ofParameter<float> minArea, maxArea, squareness, threshold, trackerPersist, trackerDist;
-    ofParameter<int> nDilate, trainingLabel;
-    ofParameter<bool> inCalibrationState, inAddingSamplesState, inTrainingStateOn, inClassifyingState;
+    ofParameter<int> nDilate;
+    ofParameter<bool> inCalibrationState, inAddingSamplesState, inTrainingState, inClassifyingState;
     
     ofxCv::RectTrackerFollower<Letter> letterTracker;
     
