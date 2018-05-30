@@ -7,15 +7,6 @@
 
 #include "letter.h"
 
-const string Letter::getStateTitle(classificationState state) {
-    switch(state) {
-        case NO_IMAGE: return "NO_IMAGE";
-        case HAS_IMAGE: return "HAS_IMAGE";
-        case READY_TO_CLASSIFY: return "READY_TO_CLASSIFY";
-        case CLASSIFIED: return "CLASSIFIED";
-    }
-}
-
 void Letter::setup(const cv::Rect& track) {
     color.setHsb(ofRandom(0, 255), 255, 255);
     position = toOf(track).getCenter();
@@ -23,6 +14,7 @@ void Letter::setup(const cv::Rect& track) {
     smooth = position;
     characterLabel.set("Unknown");
     state = NO_IMAGE;
+    selected = true;
 }
 
 void Letter::setImage(const ofImage & _img) {
@@ -45,6 +37,11 @@ ofImage Letter::getImage() {
     return img;
 }
 
+void Letter::assignLabel(string _assignedLabel) {
+    characterLabel.set(_assignedLabel);
+    state = LABEL_ASSIGNED;
+}
+    
 void Letter::classify(string _classificationLabel, bool _isPrediction) {
     if (state == READY_TO_CLASSIFY) {
         characterLabel.set(_classificationLabel);
@@ -82,10 +79,25 @@ void Letter::draw() {
 
 void Letter::drawThumb(int size) {
     img.draw(0, 0, size, size);
+    if (selected) {
+        ofPushStyle();
+        ofNoFill();
+        ofSetColor(ofColor::white);
+        ofSetLineWidth(4);
+        ofDrawRectangle(1, 1, size-4, size-4);
+        ofPopStyle();
+    }
     string labelStr = "no class";
-    labelStr = ofToString(getLabel())+":"+ofToString(getStateTitle(state))+":"+characterLabel;
-    ofDrawBitmapStringHighlight(labelStr, 4, 4);
-    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 21);
+    ofColor foreground = (selected?ofColor::black:ofColor::white);
+    ofColor background = (selected?ofColor::white:ofColor::black);
+    labelStr = (selected?"☑︎ ":"☒ ")+ofToString(getLabel())+":"+ofToString(getStateTitle(state))+":"+characterLabel;
+    ofDrawBitmapStringHighlight(labelStr, 4, 4, background, foreground);
+    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 21, background, foreground);
+    // Save image location
+    ofMatrix4x4 matrix = ofGetCurrentMatrix(OF_MATRIX_MODELVIEW);
+    ofVec3f translation = matrix.getTranslation();
+    thumbnailPosition.x = translation.x + ofGetWindowWidth()/2;
+    thumbnailPosition.y = translation.y + ofGetWindowHeight()/2;
 }
 
 bool Letter::isItSquareEnough(float squareness) {
@@ -107,6 +119,37 @@ int Letter::getLabel() {
 
 bool Letter::readyToClassify() {
     if (state == READY_TO_CLASSIFY) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool Letter::isSelected() {
+    return selected;
+}
+
+void Letter::setSelection(bool _selection) {
+    selected = _selection;
+}
+
+const string Letter::getStateTitle(classificationState state) {
+    switch(state) {
+        case NO_IMAGE: return "NO_IMAGE";
+        case HAS_IMAGE: return "HAS_IMAGE";
+        case LABEL_ASSIGNED: return "LABEL_ASSIGNED";
+        case READY_TO_CLASSIFY: return "READY_TO_CLASSIFY";
+        case CLASSIFIED: return "CLASSIFIED";
+    }
+}
+
+bool Letter::toggleSelectedIfMouseClickIsInside(int x, int y, int thumbnailSize) {
+    if (x > thumbnailPosition.x
+        && y > thumbnailPosition.y
+        && x < (thumbnailPosition.x + thumbnailSize)
+        && y < (thumbnailPosition.y + thumbnailSize)) {
+        // Successful hit
+        selected = !selected;
         return true;
     } else {
         return false;

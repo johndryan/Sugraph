@@ -13,6 +13,8 @@ void ofApp::setup(){
     width = 640;
     height = 480;
     scrollPos = 0;
+    thumbnailSize = 150;
+    drawThumbnailsLocation.set(210, 0.75*height+25);
     
     ccv.setup(ofToDataPath("image-net-2012.sqlite3"));
 
@@ -136,29 +138,7 @@ void ofApp::update(){
         // Could all be handled by a single manager Class?
         letterTracker.setPersistence(trackerPersist);
         letterTracker.setMaximumDistance(trackerDist);
-        vector<unsigned int> letterTrackerLabels = letterTracker.track(contourFinder2.getBoundingRects());
-        vector<Letter>& letters = letterTracker.getFollowers();
-        const vector<unsigned int>& newLabels = letterTracker.getNewLabels();
-
-        // Find the Letter for any new Labels and set their image
-        for(int i = 0; i < newLabels.size(); i++) {
-            int newLabel = newLabels[i];
-            // Find position of Letter with that Label
-            vector<unsigned int>::const_iterator index = find(letterTrackerLabels.begin(), letterTrackerLabels.end(), newLabel);
-            if (index != letterTrackerLabels.end()) {
-                int iteratorPosition = distance<vector<unsigned int>::const_iterator> (letterTrackerLabels.begin(), index);
-                // If iteratorPosition is inside letters, then update image
-                if (iteratorPosition >= 0 && iteratorPosition < letters.size()) {
-                    // Kill if not square enough, helpful for my letters
-                    if (letters[iteratorPosition].isItSquareEnough(squareness)) {
-                        // Do I need to copy of an ofImage?
-                        ofImage camTempCopy;
-                        camTempCopy.setFromPixels(colorImage.getPixels());
-                        letters[iteratorPosition].setImage(camTempCopy);
-                    }
-                }
-            }
-        }
+        setImagesForNewLettersFound();
         
 //        if (toAddSamples) {
 //            addSamplesToTrainingSet();
@@ -171,7 +151,6 @@ void ofApp::update(){
     if (systemState == CLASSIFYING) {
         // Classify all letters that are ready
         vector<Letter>& letters = letterTracker.getFollowers();
-        ofLog(OF_LOG_NOTICE, "Classifying all letters…");
         for (Letter & letter : letters) {
             if (letter.readyToClassify()) {
                 classifyLetter(letter);
@@ -229,27 +208,17 @@ void ofApp::draw(){
     
     ofPopMatrix();
     
-    int tileSize = 150; // 224
-    
     // draw tiles
     ofPushMatrix();
     ofPushStyle();
-    ofTranslate(210, 0.75*height+25);
+    ofTranslate(drawThumbnailsLocation.x, drawThumbnailsLocation.y);
     int nPerRow = max(8, (int) ceil(letters.size()/3.0));
     // Basic scrolling: is there a better way?
-    ofTranslate(-ofMap(scrollPos, 0, ofGetWidth(), 0, max(0,nPerRow-5)*(tileSize+2)), 0);
+    ofTranslate(-ofMap(scrollPos, 0, ofGetWidth(), 0, max(0,nPerRow-5)*(thumbnailSize+2)), 0);
     for (int i=0; i<letters.size(); i++) {
         ofPushMatrix();
-        ofTranslate((tileSize+2)*(i%nPerRow), (tileSize+16)*floor(i/nPerRow));
-        // TODO: Fix letter thumbnail images
-        // Temp fix to show something
-//        ofImage img;
-//        img.setFromPixels(colorImage.getPixels());
-//        img.crop(letters[i].getRect().x, letters[i].getRect().y, letters[i].getRect().width, letters[i].getRect().height);
-//        img.resize(tileSize, tileSize);
-//        img.draw(0, 0);
-        // ^ remove above, and handle in class method below v
-        letters[i].drawThumb(tileSize);
+        ofTranslate((thumbnailSize+2)*(i%nPerRow), (thumbnailSize+16)*floor(i/nPerRow));
+        letters[i].drawThumb(thumbnailSize);
         ofPopMatrix();
     }
     ofPopMatrix();
@@ -261,6 +230,33 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::exit() {
     gui.saveToFile(ofToDataPath("settings_sugraphclassifier_cv.xml"));
+}
+
+//--------------------------------------------------------------
+void ofApp::setImagesForNewLettersFound() {
+    vector<unsigned int> letterTrackerLabels = letterTracker.track(contourFinder2.getBoundingRects());
+    vector<Letter>& letters = letterTracker.getFollowers();
+    const vector<unsigned int>& newLabels = letterTracker.getNewLabels();
+    
+    // Find the Letter for any new Labels and set their image
+    for(int i = 0; i < newLabels.size(); i++) {
+        int newLabel = newLabels[i];
+        // Find position of Letter with that Label
+        vector<unsigned int>::const_iterator index = find(letterTrackerLabels.begin(), letterTrackerLabels.end(), newLabel);
+        if (index != letterTrackerLabels.end()) {
+            int iteratorPosition = distance<vector<unsigned int>::const_iterator> (letterTrackerLabels.begin(), index);
+            // If iteratorPosition is inside letters, then update image
+            if (iteratorPosition >= 0 && iteratorPosition < letters.size()) {
+                // Kill if not square enough, helpful for my letters
+                if (letters[iteratorPosition].isItSquareEnough(squareness)) {
+                    // Do I need to copy of an ofImage?
+                    ofImage camTempCopy;
+                    camTempCopy.setFromPixels(colorImage.getPixels());
+                    letters[iteratorPosition].setImage(camTempCopy);
+                }
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -384,11 +380,30 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 void ofApp::mousePressed(int x, int y, int button){
-
+    if (x > drawThumbnailsLocation.x && y > drawThumbnailsLocation.y) {
+        checkLettersForMouseClick(x,y);
+    }
 }
 void ofApp::mouseReleased(int x, int y, int button){
 
 }
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
     scrollPos += scrollX * 10;
+}
+
+void ofApp::keyPressed  (int key){
+    string message = "keyPressed: " + ofToString((char)key);
+    ofLog(OF_LOG_NOTICE, message);
+}
+
+void ofApp::keyReleased(int key){
+    
+}
+
+void ofApp::checkLettersForMouseClick(int x, int y) {
+    vector<Letter>& letters = letterTracker.getFollowers();
+    for (Letter & letter : letters) {
+        // Check if any letter was clicked, and stop whenever you discover one
+        if (letter.toggleSelectedIfMouseClickIsInside(x, y, thumbnailSize)) break;
+    }
 }
