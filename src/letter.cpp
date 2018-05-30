@@ -14,7 +14,7 @@ void Letter::setup(const cv::Rect& track) {
     smooth = position;
     characterLabel.set("Unknown");
     state = NO_IMAGE;
-    selected = true;
+    selected = false;
 }
 
 void Letter::setImage(const ofImage & _img) {
@@ -77,27 +77,49 @@ void Letter::draw() {
     ofPopStyle();
 }
 
-void Letter::drawThumb(int size) {
-    img.draw(0, 0, size, size);
-    if (selected) {
-        ofPushStyle();
-        ofNoFill();
-        ofSetColor(ofColor::white);
-        ofSetLineWidth(4);
-        ofDrawRectangle(1, 1, size-4, size-4);
-        ofPopStyle();
-    }
-    string labelStr = "no class";
-    ofColor foreground = (selected?ofColor::black:ofColor::white);
-    ofColor background = (selected?ofColor::white:ofColor::black);
-    labelStr = (selected?"☑︎ ":"☒ ")+ofToString(getLabel())+":"+ofToString(getStateTitle(state))+":"+characterLabel;
-    ofDrawBitmapStringHighlight(labelStr, 4, 4, background, foreground);
-    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 21, background, foreground);
+void Letter::drawThumb(int size, bool selectable) {
+    // Only display selected states if selectable
+    bool _selected = selected;
+    if (!selectable) _selected = false;
+    string labelStr = "";
+    ofColor foreground = (_selected?ofColor::black:ofColor::white);
+    ofColor background = (_selected?ofColor::white:ofColor::black);
+    // Draw image and fake stroke
+    ofPushStyle();
+    ofSetLineWidth(0);
+    ofSetColor(background);
+    ofDrawRectangle(0, 0, size, size);
+    ofPopStyle();
+    int outlineWidth = 4;
+    img.draw(outlineWidth, outlineWidth, size-outlineWidth*2, size-outlineWidth*2);
+    // Draw Labels & Checkmark
+    labelStr = ofToString(getLabel())+": "+characterLabel;
+    ofDrawBitmapStringHighlight(labelStr, 4, size-24, background, foreground);
+    labelStr = ofToString(getStateTitle(state));
+    ofDrawBitmapStringHighlight(labelStr, 4, size-6, background, foreground);
+//    ofDrawBitmapStringHighlight("{"+ofToString(rect.x)+","+ofToString(rect.y)+","+ofToString(rect.width)+","+ofToString(rect.height)+"}", 4, 28, background, foreground);
+    if (selectable) drawCheckmark(size-24,8,_selected);
     // Save image location
     ofMatrix4x4 matrix = ofGetCurrentMatrix(OF_MATRIX_MODELVIEW);
     ofVec3f translation = matrix.getTranslation();
     thumbnailPosition.x = translation.x + ofGetWindowWidth()/2;
     thumbnailPosition.y = translation.y + ofGetWindowHeight()/2;
+}
+
+void Letter::drawCheckmark(int x, int y, bool _selected) {
+    ofPushStyle();
+    ofPushMatrix();
+    ofSetLineWidth(2);
+    ofNoFill();
+    ofSetColor(_selected?ofColor::white:ofColor::black);
+    ofTranslate(x, y);
+    ofDrawRectangle(0, 0, 16, 16);
+    if (_selected) {
+        ofDrawLine(4, 8, 7, 11);
+        ofDrawLine(12, 5, 7, 11);
+    }
+    ofPopMatrix();
+    ofPopStyle();
 }
 
 bool Letter::isItSquareEnough(float squareness) {

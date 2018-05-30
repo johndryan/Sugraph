@@ -49,7 +49,8 @@ public:
     void update(const cv::Rect& track);
     void kill();
     void draw();
-    void drawThumb(int size);
+    void drawThumb(int size, bool selectable);
+    void drawCheckmark(int x, int y, bool selected);
     bool isItSquareEnough(float squareness);
     cv::Rect getRect();
     int getLabel();

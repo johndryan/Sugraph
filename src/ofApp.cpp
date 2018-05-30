@@ -31,16 +31,16 @@ void ofApp::setup(){
     trainingLabel.addListener(this, &ofApp::setTrainingLabel);
     
     // There's got to be a better way to toggle an enum in ofxGui?
-    systemState = CALIBRATION;
+    systemState = ADDING_SAMPLES;
     inCalibrationState.addListener(this, &ofApp::enterCalibrationState);
     inAddingSamplesState.addListener(this, &ofApp::enterAddingSamplesState);
     inTrainingStateOn.addListener(this, &ofApp::enterTrainingState);
     inClassifyingState.addListener(this, &ofApp::enterClassifyingState);
     gSysState.setName("System State");
-    gSysState.add(inCalibrationState.set("Calibrating", true));
-    gSysState.add(inAddingSamplesState.set("Adding Samples", false));
-    gSysState.add(inTrainingStateOn.set("Train New Model", false));
-    gSysState.add(inClassifyingState.set("Classifying", false));
+    gSysState.add(inCalibrationState.set("Calibrating", (systemState==CALIBRATION)));
+    gSysState.add(inAddingSamplesState.set("Adding Samples", (systemState==ADDING_SAMPLES)));
+    gSysState.add(inTrainingStateOn.set("Train New Model", (systemState==TRAINING)));
+    gSysState.add(inClassifyingState.set("Classifying", (systemState==CLASSIFYING)));
     
     gui.setup();
     gui.setName("SugraphClassifier");
@@ -218,7 +218,7 @@ void ofApp::draw(){
     for (int i=0; i<letters.size(); i++) {
         ofPushMatrix();
         ofTranslate((thumbnailSize+2)*(i%nPerRow), (thumbnailSize+16)*floor(i/nPerRow));
-        letters[i].drawThumb(thumbnailSize);
+        letters[i].drawThumb(thumbnailSize, (systemState == ADDING_SAMPLES));
         ofPopMatrix();
     }
     ofPopMatrix();
@@ -380,8 +380,11 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 void ofApp::mousePressed(int x, int y, int button){
-    if (x > drawThumbnailsLocation.x && y > drawThumbnailsLocation.y) {
-        checkLettersForMouseClick(x,y);
+    // If Adding Samples, then Letter thumbnails become selectable
+    if (systemState == ADDING_SAMPLES) {
+        if (x > drawThumbnailsLocation.x && y > drawThumbnailsLocation.y) {
+            checkLettersForMouseClick(x,y);
+        }
     }
 }
 void ofApp::mouseReleased(int x, int y, int button){
@@ -392,8 +395,25 @@ void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 }
 
 void ofApp::keyPressed  (int key){
-    string message = "keyPressed: " + ofToString((char)key);
-    ofLog(OF_LOG_NOTICE, message);
+    if (systemState == ADDING_SAMPLES) {
+        if (isalnum(key) ||
+            key == OF_KEY_BACKSPACE ||
+            key == OF_KEY_DEL) {
+            // TODO: encapulsate this in a class:
+            vector<Letter>& letters = letterTracker.getFollowers();
+            for (Letter & letter : letters) {
+                if (letter.isSelected()) {
+                    string assignedKey = ((key==OF_KEY_BACKSPACE||key==OF_KEY_DEL)?"falsePositive":ofToString((char)key));
+                    letter.assignLabel(assignedKey);
+                }
+            }
+        } else if (key == OF_KEY_TAB) {
+            vector<Letter>& letters = letterTracker.getFollowers();
+            for (Letter & letter : letters) {
+                letter.setSelection(false);
+            }
+        }
+    }
 }
 
 void ofApp::keyReleased(int key){
