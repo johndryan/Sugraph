@@ -34,7 +34,7 @@ protected:
         LABEL_ASSIGNED,
         IN_TRAINING_SET,
         READY_TO_CLASSIFY,
-        CLASSIFIED
+        IDENTIFIED
     };
     const string getStateTitle(classificationState state);
     classificationState state;

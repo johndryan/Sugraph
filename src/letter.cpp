@@ -46,7 +46,7 @@ void Letter::assignLabel(char _assignedLabel) {
 void Letter::classify(char _classificationLabel, bool _isPrediction) {
     if (state == READY_TO_CLASSIFY) {
         characterLabel = _classificationLabel;
-        state = CLASSIFIED;
+        state = IDENTIFIED;
         // If no classification, remove this letter
         if (!_isPrediction) {
             kill();
@@ -186,7 +186,7 @@ const string Letter::getStateTitle(classificationState state) {
         case LABEL_ASSIGNED: return "LABEL_ASSIGNED";
         case IN_TRAINING_SET: return "IN_TRAINING_SET";
         case READY_TO_CLASSIFY: return "READY_TO_CLASSIFY";
-        case CLASSIFIED: return "CLASSIFIED";
+        case IDENTIFIED: return "IDENTIFIED";
     }
 }
 
