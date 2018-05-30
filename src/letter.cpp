@@ -12,7 +12,8 @@ void Letter::setup(const cv::Rect& track) {
     position = toOf(track).getCenter();
     rect = track;
     smooth = position;
-    characterLabel.set("Unknown");
+    // ' ' is empty, '*' is false positive, other letters are their (char)
+    characterLabel = ' ';
     state = NO_IMAGE;
     selected = false;
 }
@@ -37,14 +38,14 @@ ofImage Letter::getImage() {
     return img;
 }
 
-void Letter::assignLabel(string _assignedLabel) {
-    characterLabel.set(_assignedLabel);
+void Letter::assignLabel(char _assignedLabel) {
+    characterLabel = _assignedLabel;
     state = LABEL_ASSIGNED;
 }
     
-void Letter::classify(string _classificationLabel, bool _isPrediction) {
+void Letter::classify(char _classificationLabel, bool _isPrediction) {
     if (state == READY_TO_CLASSIFY) {
-        characterLabel.set(_classificationLabel);
+        characterLabel = _classificationLabel;
         state = CLASSIFIED;
         // If no classification, remove this letter
         if (!_isPrediction) {
@@ -148,7 +149,7 @@ int Letter::getLabel() {
     return label;
 }
 
-string Letter::getCharacterLabel() {
+char Letter::getCharacterLabel() {
     return characterLabel;
 }
 
@@ -170,7 +171,7 @@ bool Letter::isLabelAssigned() {
 
 void Letter::setInTrainingSet() {
     selected = false;
-    state == IN_TRAINING_SET;
+    state = IN_TRAINING_SET;
 }
 
 void Letter::setSelection(bool _selection) {

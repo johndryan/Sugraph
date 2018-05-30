@@ -17,7 +17,7 @@ using namespace cv;
 
 class Letter : public ofxCv::RectFollower {
 protected:
-    ofParameter<string> characterLabel;
+    char characterLabel;
     
     ofImage img;
     cv::Rect rect;
@@ -45,8 +45,8 @@ public:
     void setup(const cv::Rect& track);
     void setImage(const ofImage & _img);
     ofImage getImage();
-    void assignLabel(string _assignedLabel);
-    void classify(string _classificationLabel, bool _isPrediction);
+    void assignLabel(char _assignedLabel);
+    void classify(char _classificationLabel, bool _isPrediction);
     void update(const cv::Rect& track);
     void kill();
     void draw();
@@ -56,7 +56,7 @@ public:
     cv::Rect getRect();
     // It's a bit confusing that the countourtracker 'label' and the class label both use that term?
     int getLabel();
-    string getCharacterLabel();
+    char getCharacterLabel();
     bool readyToClassify();
     bool isSelected();
     bool isLabelAssigned();

@@ -3,10 +3,11 @@
 	<D>0</D>
 	<Run>0</Run>
 	<CV_initial>
-		<Min_area>13.6276</Min_area>
-		<Max_area>26.4592</Max_area>
-		<Threshold>105.383</Threshold>
+		<Min_area>14</Min_area>
+		<Max_area>26</Max_area>
+		<Threshold>105</Threshold>
 		<Dilations>3</Dilations>
+		<Squareness__W_H_>1.6</Squareness__W_H_>
 	</CV_initial>
 	<E>0</E>
 	<Pause_Video>0</Pause_Video>
@@ -14,4 +15,10 @@
 		<Persistance__Frames_>60</Persistance__Frames_>
 		<Distance__Pixels_>32</Distance__Pixels_>
 	</Contour_Tracker>
+	<System_State>
+		<Calibrating>0</Calibrating>
+		<Adding_Samples>1</Adding_Samples>
+		<Train_New_Model>0</Train_New_Model>
+		<Classifying>0</Classifying>
+	</System_State>
 </SugraphClassifier>

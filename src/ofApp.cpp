@@ -60,7 +60,7 @@ void ofApp::setup(){
     gui.add(gCv);
     gui.add(gCvTracker);
     gui.setPosition(0, 400);
-    gui.loadFromFile("settings_sugraphclassifier_cv.xml");
+    gui.loadFromFile(ofToDataPath("settings.xml"));
     
     fbo.allocate(width, height);
     colorImage.allocate(width, height);
@@ -134,10 +134,10 @@ void ofApp::update(){
         letterTracker.setMaximumDistance(trackerDist);
         setImagesForNewLettersFound();
         
-//        if (toAddSamples) {
-//            addSamplesToTrainingSet();
-//            toAddSamples = false;
-//        }
+        if (toAddSamples) {
+            addSamplesToTrainingSet();
+            toAddSamples = false;
+        }
     }
 
     // HANDLE VARIOUS SYSTEM STATES
@@ -223,7 +223,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    gui.saveToFile(ofToDataPath("settings_sugraphclassifier_cv.xml"));
+    gui.saveToFile(ofToDataPath("settings.xml"));
 }
 
 //--------------------------------------------------------------
@@ -255,17 +255,19 @@ void ofApp::setImagesForNewLettersFound() {
 
 //--------------------------------------------------------------
 void ofApp::addSamplesToTrainingSet() {
-//    ofLog(OF_LOG_NOTICE, "Adding all samples...");
-//    vector<Letter>& letters = letterTracker.getFollowers();
-//    for (Letter & letter : letters) {
-//        vector<float> encoding = ccv.encode(letter.getImage(), ccv.numLayers()-1);
-//        VectorFloat inputVector(encoding.size());
-//        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
-//        trainingData.addSample(letter.getCharacterLabel(), inputVector);
-//        ofLog(OF_LOG_NOTICE, "Added Letter #"+ofToString(letter.getLabel())+" as sample for "+ofToString(letter.getCharacterLabel()));
-//        // Mark letter as sampled?
-//        letter.setInTrainingSet();
-//    }
+    ofLog(OF_LOG_NOTICE, "Adding all samples...");
+    vector<Letter>& letters = letterTracker.getFollowers();
+    for (Letter & letter : letters) {
+        if (letter.isLabelAssigned()) {
+        vector<float> encoding = ccv.encode(letter.getImage(), ccv.numLayers()-1);
+        VectorFloat inputVector(encoding.size());
+        for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
+        trainingData.addSample((int)letter.getCharacterLabel(), inputVector);
+        // Mark letter as sampled
+        letter.setInTrainingSet();
+        ofLog(OF_LOG_NOTICE, "Added Letter #"+ofToString(letter.getLabel())+" as sample for "+ofToString(letter.getCharacterLabel()));
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -285,13 +287,13 @@ void ofApp::classifyLetter(Letter & letter) {
     VectorFloat inputVector(encoding.size());
     for (int i=0; i<encoding.size(); i++) inputVector[i] = encoding[i];
     if (pipeline.predict(inputVector)) {
-        // gt classification
+        // Get classification
         int classification = pipeline.getPredictedClassLabel();
-        string letterClassLookup = classNames[classification];
-        letter.classify(letterClassLookup, true);
+        // Return false if equal to falsePositiveCharacter (i.e. *)
+        letter.classify((char)classification, ((char)classification!=falsePositiveCharacter));
     } else {
-        // TODO Does this mean prediction was negative or failed?
-        letter.classify("Unknown", false);
+        // TODO: Does this mean prediction was negative or failed?
+        letter.classify(' ', false);
     }
 }
 
@@ -390,11 +392,14 @@ void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 void ofApp::keyPressed  (int key){
     if (systemState == ADDING_SAMPLES) {
         if (isalnum(key) ||
-            (char)key == '*') {
-            // TODO: encapulsate this in a class:
+            (char)key == falsePositiveCharacter) {
+            // TODO: encapulsate all this in a class:
             vector<Letter>& letters = letterTracker.getFollowers();
             for (Letter & letter : letters) {
-                if (letter.isSelected()) letter.assignLabel(ofToString((char)key));
+                if (letter.isSelected()) {
+                    letter.assignLabel((char)key);
+                    letter.setSelection(false);
+                }
             }
         } else if (key == OF_KEY_TAB) {
             // Deselect all letters
